@@ -63,7 +63,7 @@ Void heartBeatFxn(UArg arg0, UArg arg1)
     }
 }
 
-int setupMicADC(void)
+static void configMicADC(void)
 {
     Task_Params taskParams;
         /* Call board init functions */
@@ -116,48 +116,57 @@ int setupMicADC(void)
 
 
     //  ADCSequenceDataGet(ADC0_BASE, 0, &ui32Value);
+}
 
-        uint32_t value[7];
+static void MicADC(UArg arg0)
+{
+    configMicADC();
 
-        int i = 0;
-        int p;
-        while(i < 10)
+    uint32_t value[7];
+
+    int i = 0;
+    int p;
+    while(i < 10)
+    {
+        ADCProcessorTrigger(ADC0_BASE, 0);
+        ADCIntClear(ADC0_BASE, 0);
+
+        ADCSequenceDataGet(ADC0_BASE, 0, value);
+
+        while(!ADCIntStatus(ADC0_BASE, 0, false))
         {
-            ADCProcessorTrigger(ADC0_BASE, 0);
-            ADCIntClear(ADC0_BASE, 0);
-
-            ADCSequenceDataGet(ADC0_BASE, 0, value);
-
-            while(!ADCIntStatus(ADC0_BASE, 0, false))
-            {
-            }
-
-            for (p = 0; p <= 8; p++)
-            {
-                System_printf("AIN9, reading %d = %4d\n", p, value[p]);
-                System_flush();
-            }
-
-            SysCtlDelay(500);
-
-            i++;
         }
 
-        /* Construct heartBeat Task  thread */
-        Task_Params_init(&taskParams);
-        taskParams.arg0 = 1000;
-        taskParams.stackSize = TASKSTACKSIZE;
-        taskParams.stack = &task0Stack;
-        Task_construct(&task0Struct, (Task_FuncPtr)heartBeatFxn, &taskParams, NULL);
+        for (p = 0; p <= 8; p++)
+        {
+            System_printf("AIN9, reading %d = %4d\n", p, value[p]);
+            System_flush();
+        }
 
-         /* Turn on user LED */
-        GPIO_write(Board_LED0, Board_LED_ON);
+        Task_slepp(500);
+        Event_post(UART_Event, Event_Id_01);
+        i++;
+    }
 
-        System_printf("Starting the example\nSystem provider is set to SysMin. "
-                      "Halt the target to view any SysMin contents in ROV.\n");
-        /* SysMin will only print to the console when you call flush or exit */
 
-        System_flush();
 
-        return (0);
+}
+
+static void heartbeatFxn(void)
+{
+    /* Construct heartBeat Task  thread */
+    Task_Params_init(&taskParams);
+    taskParams.arg0 = 1000;
+    taskParams.stackSize = TASKSTACKSIZE;
+    taskParams.stack = &task0Stack;
+    Task_construct(&task0Struct, (Task_FuncPtr)heartBeatFxn, &taskParams, NULL);
+
+     /* Turn on user LED */
+    GPIO_write(Board_LED0, Board_LED_ON);
+
+    System_printf("Starting the example\nSystem provider is set to SysMin. "
+                  "Halt the target to view any SysMin contents in ROV.\n");
+    /* SysMin will only print to the console when you call flush or exit */
+
+    System_flush();
 }
