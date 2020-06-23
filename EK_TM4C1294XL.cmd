@@ -54,4 +54,5 @@ SECTIONS
     .bss    :   > SRAM
     .sysmem :   > SRAM
     .stack  :   > SRAM
+    .vtable :	> SRAM
 }
