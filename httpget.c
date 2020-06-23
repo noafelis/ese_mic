@@ -137,6 +137,11 @@ Void httpTask(UArg arg0, UArg arg1)
 	System_printf("Recieved %d bytes of payload\n", len);
 	System_flush();
 
+	while(1)
+	{
+		//just trying to prevent bios from exiting
+	}
+
 	HTTPCli_disconnect(&cli);
 	HTTPCli_destruct(&cli);
 }
@@ -172,11 +177,21 @@ int main(void)
 {
 	/* Call board init functions */
 	Board_initGeneral();
+	System_printf("Board_initGeneral()\n");
+	System_flush();
+
 	Board_initGPIO();
+	System_printf("Board_initGPIO()\n");
+	System_flush();
+
 	Board_initEMAC();
-	setup_UART_Task(15);
-	setupMicADCTask();
+	System_printf("Board_initEMAC()\n");
+	System_flush();
+
+//	setup_UART_Task(15);
 	initializeADCnStuff();
+	System_printf("initializeADCnStuff\n");
+	System_flush();
 
 	/* Turn on user LED */
 	GPIO_write(Board_LED0, Board_LED_ON);

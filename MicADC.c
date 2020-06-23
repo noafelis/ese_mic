@@ -5,6 +5,13 @@
  *      Author: noa
  */
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <inc/hw_memmap.h>
+#include <ctype.h>
+#include <string.h>
+
 /* XDCtools Header files */
 #include <xdc/std.h>
 #include <xdc/cfg/global.h>
@@ -68,6 +75,7 @@ Event_Handle mic_Event;
 //*************************************************************************
 /* Fctn declarations */
 interrupt void micISR(void);
+static void micADC(void);
 
 //*************************************************************************
 void initializeADCnStuff(void)
@@ -173,31 +181,6 @@ void create_event(void)
 }
 
 
-void setupMicADCTask(void)
-{
-	/* Setup Task and create it */
-	Task_Params taskParams;
-	Task_Handle micHandle;
-	Error_Block eb;
-
-	create_event();
-
-	//create task
-	Error_init(&eb);
-	Task_Params_init(&taskParams);
-	taskParams.arg0 = NULL;
-	taskParams.stackSize = 2048;
-	taskParams.priority = 15;		//15: highest priority
-	micHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb);
-	if (micHandle == NULL)
-	{
-		System_abort("Error creating clicky task");
-	}
-}
-
-
-
-
 interrupt void micISR(void)
 {
 	uint32_t status = 0;
@@ -210,12 +193,15 @@ interrupt void micISR(void)
 	//GPIO_INT_PIN_0 - interrupt due to activity on pin 0
 	if ((status & GPIO_INT_PIN_0) == GPIO_INT_PIN_0)
 	{
-		Event_post(UART_Event, Event_Id_01);
+		fprintf(stdout, "\n*************************\ninside micISR\n*************************\n");
+		micADC();
+//		Event_post(UART_Event, Event_Id_01);
 	}
 }
 
 
-static void micADC(UArg arg0)
+//static void micADC(UArg arg0)
+static void micADC(void)
 {
 	uint32_t value[7];
 

@@ -10,7 +10,8 @@
 
 void initializeADCnStuff(void);
 void initializeInterrupts(void);
-static void micADC(UArg arg0);
+//static void micADC(UArg arg0);
+static void micADC(void);
 void setupMicADCTask(void);
 
 

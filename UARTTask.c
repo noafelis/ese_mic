@@ -80,7 +80,7 @@ void UARTFxn(UArg arg0, UArg arg1)
 
 		GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_0, 1);
 
-		if(Event_Id_01)
+		if((events && Event_Id_01) == Event_Id_01)
 		{
 			char uartTest[] = "\n\nThis is a test!\n\n";
 			UART_write(uart, uartTest, strlen(uartTest));
