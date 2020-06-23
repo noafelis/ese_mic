@@ -20,58 +20,58 @@
 #include <ti/drivers/EMAC.h>
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/I2C.h>
-#include <ti/drivers/SDSPI.h>
-#include <ti/drivers/SPI.h>
+//#include <ti/drivers/SDSPI.h>
+//#include <ti/drivers/SPI.h>
 #include <ti/drivers/UART.h>
 // #include <ti/drivers/USBMSCHFatFs.h>
 // #include <ti/drivers/Watchdog.h>
-// #include <ti/drivers/WiFi.h>
+#include <ti/drivers/WiFi.h>
 
 /* Board Header file */
 #include "Board.h"
+#include <EK_TM4C1294XL.h>
 
 /* All the C Utilities */
 #include <stdbool.h>
 #include <stdint.h>
-#include <inc/hw_memmap.h>
 #include <unistd.h>
+#include <inc/hw_memmap.h>
+#include <inc/tm4c1294ncpdt.h>
+#include <inc/hw_types.h>
 
 /* Driverlib headers */
 #include <driverlib/sysctl.h>
 #include <driverlib/uart.h>
 #include <driverlib/gpio.h>
 #include <driverlib/pin_map.h>
-#include "driverlib/interrupt.h"
+#include <driverlib/interrupt.h>
 #include <driverlib/adc.h>
 
+/* Application headers */
+#include "UARTTask.h"
+#include "MicADC.h"
+
+//*************************************************************************
+/* Defines */
 #define TASKSTACKSIZE   512
 
 #define USRBUTTON GPIO_PORTJ_BASE
 #define SW1 GPIO_PIN_0
 #define SW2 GPIO_PIN_1
 
+//*************************************************************************
+/* Global vars */
 Task_Struct task0Struct;
 Char task0Stack[TASKSTACKSIZE];
+Event_Handle mic_Event;
 
+//*************************************************************************
+/* Fctn declarations */
+interrupt void micISR(void);
 
-
-
-/*
- *  ======== heartBeatFxn ========
- *  Toggle the Board_LED0. The Task_sleep is determined by arg0 which
- *  is configured for the heartBeat Task instance.
- */
-Void heartBeatFxn(UArg arg0, UArg arg1)
+//*************************************************************************
+void initializeADCnStuff(void)
 {
-	while (1) {
-		Task_sleep((unsigned int)arg0);
-		GPIO_toggle(Board_LED0);
-	}
-}
-
-static void initializeADCnStuff(void)
-{
-	Task_Params taskParams;
 	/* Call board init functions */
 	Board_initGeneral();
 	// Board_initEMAC();
@@ -160,11 +160,49 @@ void initializeInterrupts(void)
 }
 
 
+
+void create_event(void)
+{
+	Error_Block eb;
+	Error_init(&eb);
+	mic_Event = Event_create(NULL, &eb);
+	if (mic_Event == NULL)
+	{
+		System_abort("Failed to create event");
+	}
+}
+
+
+void setupMicADCTask(void)
+{
+	/* Setup Task and create it */
+	Task_Params taskParams;
+	Task_Handle micHandle;
+	Error_Block eb;
+
+	create_event();
+
+	//create task
+	Error_init(&eb);
+	Task_Params_init(&taskParams);
+	taskParams.arg0 = NULL;
+	taskParams.stackSize = 2048;
+	taskParams.priority = 15;		//15: highest priority
+	micHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb);
+	if (micHandle == NULL)
+	{
+		System_abort("Error creating clicky task");
+	}
+}
+
+
+
+
 interrupt void micISR(void)
 {
 	uint32_t status = 0;
 	//Gets interrupt status for the specified GPIO port. Returns the current interrupt status for the specified GPIO module
-	status = GPIOPIntStatus(USRBUTTON, true);
+	status = GPIOIntStatus(USRBUTTON, true);
 
 	//Clears the interrupt for the specified interrupt source(s).
 	GPIOIntClear(USRBUTTON, status);
@@ -172,7 +210,7 @@ interrupt void micISR(void)
 	//GPIO_INT_PIN_0 - interrupt due to activity on pin 0
 	if ((status & GPIO_INT_PIN_0) == GPIO_INT_PIN_0)
 	{
-		micADC();
+		Event_post(UART_Event, Event_Id_01);
 	}
 }
 
@@ -197,6 +235,6 @@ static void micADC(UArg arg0)
 		System_flush();
 	}
 
-	Task_sleep(500);
-	Event_post(UART_Event, Event_Id_01);
+//	Task_sleep(500);
+//	Event_post(UART_Event, Event_Id_01);
 }

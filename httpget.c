@@ -54,6 +54,7 @@
 
 /* own header files */
 #include "MicADC.h"
+#include "UARTTask.h"
 
 
 #define HOSTNAME          "www.example.com"
@@ -66,8 +67,8 @@
  */
 void printError(char *errString, int code)
 {
-    System_printf("Error! code = %d, desc = %s\n", code, errString);
-    BIOS_exit(code);
+	System_printf("Error! code = %d, desc = %s\n", code, errString);
+	BIOS_exit(code);
 }
 
 /*
@@ -76,68 +77,68 @@ void printError(char *errString, int code)
  */
 Void httpTask(UArg arg0, UArg arg1)
 {
-    bool moreFlag = false;
-    char data[64];
-    int ret;
-    int len;
-    struct sockaddr_in addr;
+	bool moreFlag = false;
+	char data[64];
+	int ret;
+	int len;
+	struct sockaddr_in addr;
 
-    HTTPCli_Struct cli;
-    HTTPCli_Field fields[3] = {
-        { HTTPStd_FIELD_NAME_HOST, HOSTNAME },
-        { HTTPStd_FIELD_NAME_USER_AGENT, USER_AGENT },
-        { NULL, NULL }
-    };
+	HTTPCli_Struct cli;
+	HTTPCli_Field fields[3] = {
+		{ HTTPStd_FIELD_NAME_HOST, HOSTNAME },
+		{ HTTPStd_FIELD_NAME_USER_AGENT, USER_AGENT },
+		{ NULL, NULL }
+	};
 
-    System_printf("Sending a HTTP GET request to '%s'\n", HOSTNAME);
-    System_flush();
+	System_printf("Sending a HTTP GET request to '%s'\n", HOSTNAME);
+	System_flush();
 
-    HTTPCli_construct(&cli);
+	HTTPCli_construct(&cli);
 
-    HTTPCli_setRequestFields(&cli, fields);
+	HTTPCli_setRequestFields(&cli, fields);
 
-    ret = HTTPCli_initSockAddr((struct sockaddr *)&addr, HOSTNAME, 0);
-    if (ret < 0) {
-        printError("httpTask: address resolution failed", ret);
-    }
+	ret = HTTPCli_initSockAddr((struct sockaddr *)&addr, HOSTNAME, 0);
+	if (ret < 0) {
+		printError("httpTask: address resolution failed", ret);
+	}
 
-    ret = HTTPCli_connect(&cli, (struct sockaddr *)&addr, 0, NULL);
-    if (ret < 0) {
-        printError("httpTask: connect failed", ret);
-    }
+	ret = HTTPCli_connect(&cli, (struct sockaddr *)&addr, 0, NULL);
+	if (ret < 0) {
+		printError("httpTask: connect failed", ret);
+	}
 
-    ret = HTTPCli_sendRequest(&cli, HTTPStd_GET, REQUEST_URI, false);
-    if (ret < 0) {
-        printError("httpTask: send failed", ret);
-    }
+	ret = HTTPCli_sendRequest(&cli, HTTPStd_GET, REQUEST_URI, false);
+	if (ret < 0) {
+		printError("httpTask: send failed", ret);
+	}
 
-    ret = HTTPCli_getResponseStatus(&cli);
-    if (ret != HTTPStd_OK) {
-        printError("httpTask: cannot get status", ret);
-    }
+	ret = HTTPCli_getResponseStatus(&cli);
+	if (ret != HTTPStd_OK) {
+		printError("httpTask: cannot get status", ret);
+	}
 
-    System_printf("HTTP Response Status Code: %d\n", ret);
+	System_printf("HTTP Response Status Code: %d\n", ret);
 
-    ret = HTTPCli_getResponseField(&cli, data, sizeof(data), &moreFlag);
-    if (ret != HTTPCli_FIELD_ID_END) {
-        printError("httpTask: response field processing failed", ret);
-    }
+	ret = HTTPCli_getResponseField(&cli, data, sizeof(data), &moreFlag);
+	if (ret != HTTPCli_FIELD_ID_END) {
+		printError("httpTask: response field processing failed", ret);
+	}
 
-    len = 0;
-    do {
-        ret = HTTPCli_readResponseBody(&cli, data, sizeof(data), &moreFlag);
-        if (ret < 0) {
-            printError("httpTask: response body processing failed", ret);
-        }
+	len = 0;
+	do {
+		ret = HTTPCli_readResponseBody(&cli, data, sizeof(data), &moreFlag);
+		if (ret < 0) {
+			printError("httpTask: response body processing failed", ret);
+		}
 
-        len += ret;
-    } while (moreFlag);
+		len += ret;
+	} while (moreFlag);
 
-    System_printf("Recieved %d bytes of payload\n", len);
-    System_flush();
+	System_printf("Recieved %d bytes of payload\n", len);
+	System_flush();
 
-    HTTPCli_disconnect(&cli);
-    HTTPCli_destruct(&cli);
+	HTTPCli_disconnect(&cli);
+	HTTPCli_destruct(&cli);
 }
 
 /*
@@ -146,22 +147,22 @@ Void httpTask(UArg arg0, UArg arg1)
  */
 void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 {
-    static Task_Handle taskHandle;
-    Task_Params taskParams;
-    Error_Block eb;
+	static Task_Handle taskHandle;
+	Task_Params taskParams;
+	Error_Block eb;
 
-    /* Create a HTTP task when the IP address is added */
-    if (fAdd && !taskHandle) {
-        Error_init(&eb);
+	/* Create a HTTP task when the IP address is added */
+	if (fAdd && !taskHandle) {
+		Error_init(&eb);
 
-        Task_Params_init(&taskParams);
-        taskParams.stackSize = HTTPTASKSTACKSIZE;
-        taskParams.priority = 1;
-        taskHandle = Task_create((Task_FuncPtr)httpTask, &taskParams, &eb);
-        if (taskHandle == NULL) {
-            printError("netIPAddrHook: Failed to create HTTP Task\n", -1);
-        }
-    }
+		Task_Params_init(&taskParams);
+		taskParams.stackSize = HTTPTASKSTACKSIZE;
+		taskParams.priority = 1;
+		taskHandle = Task_create((Task_FuncPtr)httpTask, &taskParams, &eb);
+		if (taskHandle == NULL) {
+			printError("netIPAddrHook: Failed to create HTTP Task\n", -1);
+		}
+	}
 }
 
 /*
@@ -169,23 +170,26 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
  */
 int main(void)
 {
-    /* Call board init functions */
-    Board_initGeneral();
-    Board_initGPIO();
-    Board_initEMAC();
+	/* Call board init functions */
+	Board_initGeneral();
+	Board_initGPIO();
+	Board_initEMAC();
+	setup_UART_Task(15);
+	setupMicADCTask();
+	initializeADCnStuff();
 
-    /* Turn on user LED */
-    GPIO_write(Board_LED0, Board_LED_ON);
+	/* Turn on user LED */
+	GPIO_write(Board_LED0, Board_LED_ON);
 
-    initializeADCnStuff();
 
-    System_printf("Starting the HTTP GET example\nSystem provider is set to "
-            "SysMin. Halt the target to view any SysMin contents in ROV.\n");
-    /* SysMin will only print to the console when you call flush or exit */
-    System_flush();
 
-    /* Start BIOS */
-    BIOS_start();
+	System_printf("Starting the HTTP GET example\nSystem provider is set to "
+			"SysMin. Halt the target to view any SysMin contents in ROV.\n");
+	/* SysMin will only print to the console when you call flush or exit */
+	System_flush();
 
-    return (0);
+	/* Start BIOS */
+	BIOS_start();
+
+	return (0);
 }

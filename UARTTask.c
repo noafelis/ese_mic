@@ -8,6 +8,8 @@
  *  ======== UART_Task.c ========
  *  Author: Michael Kramer / Matthias Wenzl
  */
+#define TARGET_IS_TM4C129_RA2
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -44,22 +46,58 @@
 #include <EK_TM4C1294XL.h>
 
 /* Application headers */
-
+#include "Uarttask.h"
 
 Event_Handle UART_Event;
-gesture_data_t gesture_data;
 
 #define registerdebug
 
+
+void UARTFxn(UArg arg0, UArg arg1)
+{
+	UART_Handle uart;
+	UART_Params uartParams;
+	uint8_t events;
+
+	/* Create a UART with data processing off. */
+	UART_Params_init(&uartParams);
+	uartParams.writeDataMode = UART_DATA_BINARY;
+	uartParams.readDataMode = UART_DATA_BINARY;
+	uartParams.readReturnMode = UART_RETURN_FULL;
+	uartParams.readEcho = UART_ECHO_OFF;
+	uartParams.baudRate = 9600;
+	uart = UART_open(Board_UART0, &uartParams);
+
+	if (uart == NULL)
+	{
+		System_abort("Error opening the UART");
+	}
+
+	/* Loop forever echoing */
+	while (1)
+	{
+		events = Event_pend(UART_Event, Event_Id_NONE, Event_Id_01, BIOS_WAIT_FOREVER);
+
+		GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_0, 1);
+
+		if(Event_Id_01)
+		{
+			char uartTest[] = "\n\nThis is a test!\n\n";
+			UART_write(uart, uartTest, strlen(uartTest));
+		}
+	}
+}
+
+
 void create_UART_event()
 {
-    Error_Block eb;
-    Error_init(&eb);
-    UART_Event = Event_create(NULL, &eb);
-    if (UART_Event == NULL)
-    {
-        System_abort("Failed to create event");
-    }
+	Error_Block eb;
+	Error_init(&eb);
+	UART_Event = Event_create(NULL, &eb);
+	if (UART_Event == NULL)
+	{
+		System_abort("Failed to create event");
+	}
 }
 
 
@@ -68,81 +106,35 @@ void create_UART_event()
  */
 int setup_UART_Task(int prio)
 {
-    Task_Params taskUARTParams;
-    Task_Handle UARThandle;
-    Error_Block eb;
+	Task_Params taskUARTParams;
+	Task_Handle UARThandle;
+	Error_Block eb;
 
-    create_UART_event();
+	create_UART_event();
 
-    // Enable and configure the peripherals used by the UART0
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
-    GPIOPinConfigure(GPIO_PA0_U0RX);
-    GPIOPinConfigure(GPIO_PA1_U0TX);
-    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-    UART_init();
+	// Enable and configure the peripherals used by the UART0
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+	GPIOPinConfigure(GPIO_PA0_U0RX);
+	GPIOPinConfigure(GPIO_PA1_U0TX);
+	GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+	UART_init();
 
-    // Setup PortN LED1 activity signaling
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
-    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0);
+	// Setup PortN LED1 activity signaling
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
+	GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0);
 
-    Error_init(&eb);
-    Task_Params_init(&taskUARTParams);
-    taskUARTParams.stackSize = 2048;    //stack in bytes; reducing stacksize leads to overflow
-    taskUARTParams.priority = prio;     // 0-15 (15 is highest priority by default -> see RTOS Task configuration)
-    UARThandle = Task_create((Task_FuncPtr)UARTFxn, &taskUARTParams, &eb);
-    if (UARThandle == NULL)
-    {
-        System_abort("TaskUART create failed");
-    }
+	Error_init(&eb);
+	Task_Params_init(&taskUARTParams);
+	taskUARTParams.stackSize = 2048;    //stack in bytes; reducing stacksize leads to overflow
+	taskUARTParams.priority = prio;     // 0-15 (15 is highest priority by default -> see RTOS Task configuration)
+	UARThandle = Task_create((Task_FuncPtr)UARTFxn, &taskUARTParams, &eb);
+	if (UARThandle == NULL)
+	{
+		System_abort("TaskUART create failed");
+	}
 
-    return 0;
+	return 0;
 }
 
-void UARTFxn(UArg arg0, UArg arg1)
-{
-    char input;
-    UART_Handle uart;
-    UART_Params uartParams;
-    const char echoPrompt[] = "\n\n clicky module for\r\nproximity --- gestures --- irradiance and RGB\r\n\r\n";
 
-    /* Create a UART with data processing off. */
-    UART_Params_init(&uartParams);
-    uartParams.writeDataMode = UART_DATA_BINARY;
-    uartParams.readDataMode = UART_DATA_BINARY;
-    uartParams.readReturnMode = UART_RETURN_FULL;
-    uartParams.readEcho = UART_ECHO_OFF;
-    uartParams.baudRate = 9600;
-    uart = UART_open(Board_UART0, &uartParams);
-
-    if (uart == NULL)
-    {
-        System_abort("Error opening the UART");
-    }
-
-    UART_write(uart, echoPrompt, sizeof(echoPrompt));
-
-    int loopctr = 1;
-    uint8_t events;
-    uint8_t motion;
-    char output[100];
-    int ALS_timeout;
-
-    /* Loop forever echoing */
-    while (1)
-    {
-        events = Event_pend(UART_Event, Event_Id_NONE, Event_Id_01, BIO_WAIT_FOREVER);
-
-        GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_0, 1);
-
-        if(Event_Id_01)
-        {
-            char uartTest[] = "\n\nThis is a test!\n\n";
-            UART_write(uart, uartTest, strlen(uartTest));
-        }
-
-
-
-
-    }
-    }
