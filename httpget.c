@@ -177,7 +177,7 @@ int main(void)
     /* Turn on user LED */
     GPIO_write(Board_LED0, Board_LED_ON);
 
-    setupMicADC();
+    initializeADCnStuff();
 
     System_printf("Starting the HTTP GET example\nSystem provider is set to "
             "SysMin. Halt the target to view any SysMin contents in ROV.\n");

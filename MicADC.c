@@ -5,7 +5,6 @@
  *      Author: noa
  */
 
-
 /* XDCtools Header files */
 #include <xdc/std.h>
 #include <xdc/cfg/global.h>
@@ -47,8 +46,15 @@
 
 #define TASKSTACKSIZE   512
 
+#define USRBUTTON GPIO_PORTJ_BASE
+#define SW1 GPIO_PIN_0
+#define SW2 GPIO_PIN_1
+
 Task_Struct task0Struct;
 Char task0Stack[TASKSTACKSIZE];
+
+
+
 
 /*
  *  ======== heartBeatFxn ========
@@ -57,116 +63,140 @@ Char task0Stack[TASKSTACKSIZE];
  */
 Void heartBeatFxn(UArg arg0, UArg arg1)
 {
-    while (1) {
-        Task_sleep((unsigned int)arg0);
-        GPIO_toggle(Board_LED0);
-    }
+	while (1) {
+		Task_sleep((unsigned int)arg0);
+		GPIO_toggle(Board_LED0);
+	}
 }
 
-static void configMicADC(void)
+static void initializeADCnStuff(void)
 {
-    Task_Params taskParams;
-        /* Call board init functions */
-        Board_initGeneral();
-        // Board_initEMAC();
-        Board_initGPIO();
-        Board_initI2C();
+	Task_Params taskParams;
+	/* Call board init functions */
+	Board_initGeneral();
+	// Board_initEMAC();
+	Board_initGPIO();
+	Board_initI2C();
 
-        //Aktivieren der GPIO Ports, an denen das ADC Interface angeschlossen sein soll
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-        //Aktivieren gewuenschter ADC Peripherals
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+	//Aktivieren der GPIO Ports, an denen das ADC Interface angeschlossen sein soll
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+	//Aktivieren gewuenschter ADC Peripherals
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
 
-        //Setzen von Treiberstärke, Richtung für die gewünschte ADS Pins (???)
-        GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_4);
+	//Setzen von Treiberstärke, Richtung für die gewünschte ADS Pins (???)
+	GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_4);
 
-        while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0))
-        {
-        }
+	while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0))
+	{
+	}
 
-        //Bit 0 and bit 1 of RCGCADC register are used to enable the clock to ADC0 and ADC1 modules, respectively.
-        //The RCGCADC is part of the System Control register and is located at base address of 0x400F.E000 with offset 0x638
-        //Konfigurieren der Taktquelle, aus der sich der interne ADC Takt ableiten soll
-        ADCClockConfigSet(ADC0_BASE, ADC_CLOCK_SRC_PLL | ADC_CLOCK_RATE_HALF, 24);  //just used any values from TivaWare Periph Driver Lib Userguide p25
+	/*=========================== ADC config ===========================*/
+	//Bit 0 and bit 1 of RCGCADC register are used to enable the clock to ADC0 and ADC1 modules, respectively.
+	//The RCGCADC is part of the System Control register and is located at base address of 0x400F.E000 with offset 0x638
+	//Konfigurieren der Taktquelle, aus der sich der interne ADC Takt ableiten soll
+	ADCClockConfigSet(ADC0_BASE, ADC_CLOCK_SRC_PLL | ADC_CLOCK_RATE_HALF, 24);  //just used any values from TivaWare Periph Driver Lib Userguide p25
 
-        //jedes der 2 ADC Module verfügt über mehrere Sequencer, die über mehrere Steps programmiert werden können
-        //Deaktiveren eines Sequencers
-        ADCSequenceDisable(ADC0_BASE, 0);
+	//jedes der 2 ADC Module verfügt über mehrere Sequencer, die über mehrere Steps programmiert werden können
+	//Deaktiveren eines Sequencers
+	ADCSequenceDisable(ADC0_BASE, 0);
 
-        // ADCACTSS (ADC Active Sample Sequencer) to enable the SS0. When bit 0 (ASEN0) is set to 1 the SS0 is enabled.
+	// ADCACTSS (ADC Active Sample Sequencer) to enable the SS0. When bit 0 (ASEN0) is set to 1 the SS0 is enabled.
 
-        /*======= driverlib userguide 4.3 prog example =======*/
-        //Config des Sequencetriggers
-        ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_PROCESSOR, 0);
+	/*======= driverlib userguide 4.3 prog example =======*/
+	//Config des Sequencetriggers
+	ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_PROCESSOR, 0);
 
-        //Config ein/mehr Steps innerhalb Sequence
-        ADCSequenceStepConfigure(ADC0_BASE, 0 , 0, ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0); //??? Reihenfolge der ADC_CTL-xxx???
+	//Config ein/mehr Steps innerhalb Sequence
+	ADCSequenceStepConfigure(ADC0_BASE, 0 , 0, ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0); //??? Reihenfolge der ADC_CTL-xxx???
 
-        //Aktivieren der Sequence
-        ADCSequenceEnable(ADC0_BASE, 0);
+	//Aktivieren der Sequence
+	ADCSequenceEnable(ADC0_BASE, 0);
 
-        ADCIntClear(ADC0_BASE, 0);
+	ADCIntClear(ADC0_BASE, 0);
 
-        //registrieren ISR
-    //  ADCIntRegister();
+	//registrieren ISR
+	//  ADCIntRegister();
 
+	//Aktivieren Interrupt
+	//  ADCIntEnable();
+	//  ADCSequenceDataGet(ADC0_BASE, 0, &ui32Value);
 
-        //Aktivieren Interrupt
-    //  ADCIntEnable();
+	/*=========================== USRSW config ===========================*/
+	uint32_t ui32Strength;
+	uint32_t ui32PinType;
 
+	/* Activate GPIO ports */
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOJ);    // USRSWITCH Port
 
-    //  ADCSequenceDataGet(ADC0_BASE, 0, &ui32Value);
+	/* Set pin 0 of GPIO port J to digital input */
+	GPIOPinTypeGPIOInput(USRBUTTON, SW1);
+	/* Set pin 1 of GPIO port J to digital input */
+	GPIOPinTypeGPIOInput(USRBUTTON, SW2);
+
+	/* Enable pull-up for button on pin 0 of port J damit er auf Druck reagiert und strom tut */
+	GPIOPadConfigGet(USRBUTTON, SW1, &ui32Strength, &ui32PinType);
+	GPIOPadConfigSet(USRBUTTON, SW1, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
+
+	/* Enable pull-up for button on pin 1 of port J damit er auf Druck reagiert und strom tut */
+	GPIOPadConfigGet(USRBUTTON, SW2, &ui32Strength, &ui32PinType);
+	GPIOPadConfigSet(USRBUTTON, SW2, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
 }
 
-static void MicADC(UArg arg0)
+
+void initializeInterrupts(void)
 {
-    configMicADC();
+	IntMasterDisable();
+	IntEnable(INT_GPIOJ);
 
-    uint32_t value[7];
+	GPIOIntRegister(USRBUTTON, micISR);
 
-    int i = 0;
-    int p;
-    while(i < 10)
-    {
-        ADCProcessorTrigger(ADC0_BASE, 0);
-        ADCIntClear(ADC0_BASE, 0);
+	GPIOIntTypeSet(USRBUTTON, SW1, GPIO_FALLING_EDGE);
+	GPIOIntEnable(USRBUTTON, SW1);
 
-        ADCSequenceDataGet(ADC0_BASE, 0, value);
+	GPIOIntTypeSet(USRBUTTON, SW2, GPIO_FALLING_EDGE);
+	GPIOIntEnable(USRBUTTON, SW2);
 
-        while(!ADCIntStatus(ADC0_BASE, 0, false))
-        {
-        }
-
-        for (p = 0; p <= 8; p++)
-        {
-            System_printf("AIN9, reading %d = %4d\n", p, value[p]);
-            System_flush();
-        }
-
-        Task_slepp(500);
-        Event_post(UART_Event, Event_Id_01);
-        i++;
-    }
-
-
-
+	IntMasterEnable();
 }
 
-static void heartbeatFxn(void)
+
+interrupt void micISR(void)
 {
-    /* Construct heartBeat Task  thread */
-    Task_Params_init(&taskParams);
-    taskParams.arg0 = 1000;
-    taskParams.stackSize = TASKSTACKSIZE;
-    taskParams.stack = &task0Stack;
-    Task_construct(&task0Struct, (Task_FuncPtr)heartBeatFxn, &taskParams, NULL);
+	uint32_t status = 0;
+	//Gets interrupt status for the specified GPIO port. Returns the current interrupt status for the specified GPIO module
+	status = GPIOPIntStatus(USRBUTTON, true);
 
-     /* Turn on user LED */
-    GPIO_write(Board_LED0, Board_LED_ON);
+	//Clears the interrupt for the specified interrupt source(s).
+	GPIOIntClear(USRBUTTON, status);
 
-    System_printf("Starting the example\nSystem provider is set to SysMin. "
-                  "Halt the target to view any SysMin contents in ROV.\n");
-    /* SysMin will only print to the console when you call flush or exit */
+	//GPIO_INT_PIN_0 - interrupt due to activity on pin 0
+	if ((status & GPIO_INT_PIN_0) == GPIO_INT_PIN_0)
+	{
+		micADC();
+	}
+}
 
-    System_flush();
+
+static void micADC(UArg arg0)
+{
+	uint32_t value[7];
+
+	int p;
+	ADCProcessorTrigger(ADC0_BASE, 0);
+	ADCIntClear(ADC0_BASE, 0);
+
+	ADCSequenceDataGet(ADC0_BASE, 0, value);
+
+	while(!ADCIntStatus(ADC0_BASE, 0, false))
+	{
+	}
+
+	for (p = 0; p <= 8; p++)
+	{
+		System_printf("AIN9, reading %d = %4d\n", p, value[p]);
+		System_flush();
+	}
+
+	Task_sleep(500);
+	Event_post(UART_Event, Event_Id_01);
 }

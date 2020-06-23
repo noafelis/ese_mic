@@ -8,7 +8,9 @@
 #ifndef MICADC_H_
 #define MICADC_H_
 
-int setupMicADC(void);
+static void initializeADCnStuff(void);
+void initializeInterrupts(void);
+static void micADC(UArg arg0);
 
 
 #endif /* MICADC_H_ */
