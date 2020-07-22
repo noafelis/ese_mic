@@ -11,7 +11,7 @@ var makeAssembly = false;
 var Executable = xdc.module('xdc.bld.Executable');
 
 var exeOpts = new Executable.Attrs({
-        cfgScript: 'C:/Users/noa/workspace_v10/ESE_FML_feat_httpget_EK_TM4C1294XL_TI2/httpget.cfg',
+        cfgScript: 'C:/Users/noa/workspace_v10/ese_mic/ese_mic.cfg',
         profile: 'release',
         cfgHome: 'configPkg',
 });
@@ -20,7 +20,7 @@ exeOpts.cfgArgs = 'null';
 exeOpts.cfgArgsEncoded = true;
 
 var exe = Pkg[makeAssembly ? 'addAssembly': 'addExecutable'](
-    'httpget',
+    'ese_mic',
     targ,
     platform,
     exeOpts
@@ -40,10 +40,10 @@ else {
 }
 
 var thisObj = {
-    cfg:        '../httpget.cfg',
-    outputPath: 'C:/Users/noa/workspace_v10/ESE_FML_feat_httpget_EK_TM4C1294XL_TI2/Debug/configPkg',
-    exeName:    'httpget' + suffix,
-    exeIntName: 'httpget' + suffix.replace('.', '_'),
+    cfg:        '../ese_mic.cfg',
+    outputPath: 'C:/Users/noa/workspace_v10/ese_mic/Debug/configPkg',
+    exeName:    'ese_mic' + suffix,
+    exeIntName: 'ese_mic' + suffix.replace('.', '_'),
     targ:       targ,
     linkerCommandFile: 'linker.cmd',
     compilerOptFile: 'compiler.opt',

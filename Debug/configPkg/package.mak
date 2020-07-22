@@ -128,74 +128,74 @@ package/%.xdc.inc package/%_configPkg.c package/%.defs.h: %.xdc $(PKGCFGS)
 	@$(MSG) generating interfaces for package configPkg" (because $@ is older than $(firstword $?))" ...
 	$(XSRUN) -f xdc/services/intern/cmd/build.xs $(MK_IDLOPTS) -m package/package.xdc.dep -i package/package.xdc.inc package.xdc
 
-.dlls,em4f .dlls: httpget.pem4f
+.dlls,em4f .dlls: ese_mic.pem4f
 
--include package/cfg/httpget_pem4f.mak
--include package/cfg/httpget_pem4f.cfg.mak
+-include package/cfg/ese_mic_pem4f.mak
+-include package/cfg/ese_mic_pem4f.cfg.mak
 ifeq (,$(MK_NOGENDEPS))
--include package/cfg/httpget_pem4f.dep
+-include package/cfg/ese_mic_pem4f.dep
 endif
-httpget.pem4f: package/cfg/httpget_pem4f.xdl
+ese_mic.pem4f: package/cfg/ese_mic_pem4f.xdl
 	@
 
 
 ifeq (,$(wildcard .libraries,em4f))
-httpget.pem4f package/cfg/httpget_pem4f.c: .libraries,em4f
+ese_mic.pem4f package/cfg/ese_mic_pem4f.c: .libraries,em4f
 endif
 
-package/cfg/httpget_pem4f.c package/cfg/httpget_pem4f.h package/cfg/httpget_pem4f.xdl: override _PROG_NAME := httpget.xem4f
-package/cfg/httpget_pem4f.c: package/cfg/httpget_pem4f.cfg
-package/cfg/httpget_pem4f.xdc.inc: package/cfg/httpget_pem4f.xdl
-package/cfg/httpget_pem4f.xdl package/cfg/httpget_pem4f.c: .interfaces
+package/cfg/ese_mic_pem4f.c package/cfg/ese_mic_pem4f.h package/cfg/ese_mic_pem4f.xdl: override _PROG_NAME := ese_mic.xem4f
+package/cfg/ese_mic_pem4f.c: package/cfg/ese_mic_pem4f.cfg
+package/cfg/ese_mic_pem4f.xdc.inc: package/cfg/ese_mic_pem4f.xdl
+package/cfg/ese_mic_pem4f.xdl package/cfg/ese_mic_pem4f.c: .interfaces
 
 clean:: clean,em4f
-	-$(RM) package/cfg/httpget_pem4f.cfg
-	-$(RM) package/cfg/httpget_pem4f.dep
-	-$(RM) package/cfg/httpget_pem4f.c
-	-$(RM) package/cfg/httpget_pem4f.xdc.inc
+	-$(RM) package/cfg/ese_mic_pem4f.cfg
+	-$(RM) package/cfg/ese_mic_pem4f.dep
+	-$(RM) package/cfg/ese_mic_pem4f.c
+	-$(RM) package/cfg/ese_mic_pem4f.xdc.inc
 
 clean,em4f::
-	-$(RM) httpget.pem4f
-.executables,em4f .executables: httpget.xem4f
+	-$(RM) ese_mic.pem4f
+.executables,em4f .executables: ese_mic.xem4f
 
-httpget.xem4f: |httpget.pem4f
+ese_mic.xem4f: |ese_mic.pem4f
 
--include package/cfg/httpget.xem4f.mak
-httpget.xem4f: package/cfg/httpget_pem4f.oem4f 
+-include package/cfg/ese_mic.xem4f.mak
+ese_mic.xem4f: package/cfg/ese_mic_pem4f.oem4f 
 	$(RM) $@
 	@$(MSG) lnkem4f $@ ...
 	$(RM) $(XDCCFGDIR)/$@.map
-	$(ti.targets.arm.elf.M4F.rootDir)/bin/armcl -fs $(XDCCFGDIR)$(dir $@). -q -u _c_int00 --silicon_version=7M4 -z --strict_compatibility=on  -o $@ package/cfg/httpget_pem4f.oem4f   package/cfg/httpget_pem4f.xdl  -w -c -m $(XDCCFGDIR)/$@.map -l $(ti.targets.arm.elf.M4F.rootDir)/lib/libc.a
+	$(ti.targets.arm.elf.M4F.rootDir)/bin/armcl -fs $(XDCCFGDIR)$(dir $@). -q -u _c_int00 --silicon_version=7M4 -z --strict_compatibility=on  -o $@ package/cfg/ese_mic_pem4f.oem4f   package/cfg/ese_mic_pem4f.xdl  -w -c -m $(XDCCFGDIR)/$@.map -l $(ti.targets.arm.elf.M4F.rootDir)/lib/libc.a
 	
-httpget.xem4f: export C_DIR=
-httpget.xem4f: PATH:=$(ti.targets.arm.elf.M4F.rootDir)/bin/;$(PATH)
-httpget.xem4f: Path:=$(ti.targets.arm.elf.M4F.rootDir)/bin/;$(PATH)
+ese_mic.xem4f: export C_DIR=
+ese_mic.xem4f: PATH:=$(ti.targets.arm.elf.M4F.rootDir)/bin/;$(PATH)
+ese_mic.xem4f: Path:=$(ti.targets.arm.elf.M4F.rootDir)/bin/;$(PATH)
 
-httpget.test test,em4f test: httpget.xem4f.test
+ese_mic.test test,em4f test: ese_mic.xem4f.test
 
-httpget.xem4f.test:: httpget.xem4f
+ese_mic.xem4f.test:: ese_mic.xem4f
 ifeq (,$(_TESTLEVEL))
-	@$(MAKE) -R -r --no-print-directory -f $(XDCROOT)/packages/xdc/bld/xdc.mak _TESTLEVEL=1 httpget.xem4f.test
+	@$(MAKE) -R -r --no-print-directory -f $(XDCROOT)/packages/xdc/bld/xdc.mak _TESTLEVEL=1 ese_mic.xem4f.test
 else
 	@$(MSG) running $<  ...
-	$(call EXEC.httpget.xem4f, ) 
+	$(call EXEC.ese_mic.xem4f, ) 
 endif
 
 clean,em4f::
-	-$(RM) $(wildcard .tmp,httpget.xem4f,*)
+	-$(RM) $(wildcard .tmp,ese_mic.xem4f,*)
 
 
 clean:: clean,em4f
 
 clean,em4f::
-	-$(RM) httpget.xem4f
+	-$(RM) ese_mic.xem4f
 %,copy:
 	@$(if $<,,$(MSG) don\'t know how to build $*; exit 1)
 	@$(MSG) cp $< $@
 	$(RM) $@
 	$(CP) $< $@
-httpget_pem4f.oem4f,copy : package/cfg/httpget_pem4f.oem4f
-httpget_pem4f.sem4f,copy : package/cfg/httpget_pem4f.sem4f
+ese_mic_pem4f.oem4f,copy : package/cfg/ese_mic_pem4f.oem4f
+ese_mic_pem4f.sem4f,copy : package/cfg/ese_mic_pem4f.sem4f
 
 $(XDCCFGDIR)%.c $(XDCCFGDIR)%.h $(XDCCFGDIR)%.xdl: $(XDCCFGDIR)%.cfg $(XDCROOT)/packages/xdc/cfg/Main.xs | .interfaces
 	@$(MSG) "configuring $(_PROG_NAME) from $< ..."

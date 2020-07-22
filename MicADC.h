@@ -9,10 +9,8 @@
 #define MICADC_H_
 
 void initializeADCnStuff(void);
-void initializeInterrupts(void);
-//static void micADC(UArg arg0);
 static void micADC(void);
-void setupMicADCTask(void);
-
+void create_ADC_event(void);
+int setup_ADC_Task(void);
 
 #endif /* MICADC_H_ */

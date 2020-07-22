@@ -12,7 +12,8 @@ GEN_CMDS__FLAG := -l"configPkg/linker.cmd"
 ORDERED_OBJS += \
 "./EK_TM4C1294XL.obj" \
 "./MicADC.obj" \
-"./httpget.obj" \
+"./StartBIOS.obj" \
+"./UART_Mic.obj" \
 "../EK_TM4C1294XL.cmd" \
 $(GEN_CMDS__FLAG) \
 -l"C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/grlib/ccs/Debug/grlib.lib" \
@@ -125,42 +126,42 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.out \
+ese_mic.out \
 
 EXE_OUTPUTS__QUOTED += \
-"ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.out" \
+"ese_mic.out" \
 
 BIN_OUTPUTS += \
-ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.hex \
+ese_mic.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.hex" \
+"ese_mic.hex" \
 
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.out"
+	@$(MAKE) --no-print-directory -Onone "ese_mic.out"
 
 # Tool invocations
-ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+ese_mic.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: ARM Linker'
-	"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C1294NCPDT --define=NET_NDK --define=ccs --define=TIVAWARE -g --gcc --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/lib" -i"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="ESE_FML_feat_httpget_EK_TM4C1294XL_TI2_linkInfo.xml" --rom_model -o "ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.out" $(ORDERED_OBJS)
+	"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C1294NCPDT --define=NET_NDK --define=ccs --define=TIVAWARE -g --gcc --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"ese_mic.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/lib" -i"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="ese_mic_linkInfo.xml" --rom_model -o "ese_mic.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.hex: $(EXE_OUTPUTS)
+ese_mic.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo 'Invoking: ARM Hex Utility'
-	"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armhex"  -o "ESE_FML_feat_httpget_EK_TM4C1294XL_TI2.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armhex"  -o "ese_mic.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "EK_TM4C1294XL.obj" "MicADC.obj" "httpget.obj" 
-	-$(RM) "EK_TM4C1294XL.d" "MicADC.d" "httpget.d" 
+	-$(RM) "EK_TM4C1294XL.obj" "MicADC.obj" "StartBIOS.obj" "UART_Mic.obj" 
+	-$(RM) "EK_TM4C1294XL.d" "MicADC.d" "StartBIOS.d" "UART_Mic.d" 
 	-$(RMDIR) $(GEN_MISC_DIRS__QUOTED)
 	-@echo 'Finished clean'
 	-@echo ' '

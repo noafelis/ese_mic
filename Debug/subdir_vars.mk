@@ -6,7 +6,7 @@ SHELL = cmd.exe
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CFG_SRCS += \
-../httpget.cfg 
+../ese_mic.cfg 
 
 CMD_SRCS += \
 ../EK_TM4C1294XL.cmd 
@@ -14,7 +14,8 @@ CMD_SRCS += \
 C_SRCS += \
 ../EK_TM4C1294XL.c \
 ../MicADC.c \
-../httpget.c 
+../StartBIOS.c \
+../UART_Mic.c 
 
 GEN_CMDS += \
 ./configPkg/linker.cmd 
@@ -29,7 +30,8 @@ GEN_MISC_DIRS += \
 C_DEPS += \
 ./EK_TM4C1294XL.d \
 ./MicADC.d \
-./httpget.d 
+./StartBIOS.d \
+./UART_Mic.d 
 
 GEN_OPTS += \
 ./configPkg/compiler.opt 
@@ -37,7 +39,8 @@ GEN_OPTS += \
 OBJS += \
 ./EK_TM4C1294XL.obj \
 ./MicADC.obj \
-./httpget.obj 
+./StartBIOS.obj \
+./UART_Mic.obj 
 
 GEN_MISC_DIRS__QUOTED += \
 "configPkg\" 
@@ -45,12 +48,14 @@ GEN_MISC_DIRS__QUOTED += \
 OBJS__QUOTED += \
 "EK_TM4C1294XL.obj" \
 "MicADC.obj" \
-"httpget.obj" 
+"StartBIOS.obj" \
+"UART_Mic.obj" 
 
 C_DEPS__QUOTED += \
 "EK_TM4C1294XL.d" \
 "MicADC.d" \
-"httpget.d" 
+"StartBIOS.d" \
+"UART_Mic.d" 
 
 GEN_FILES__QUOTED += \
 "configPkg\linker.cmd" \
@@ -59,6 +64,7 @@ GEN_FILES__QUOTED += \
 C_SRCS__QUOTED += \
 "../EK_TM4C1294XL.c" \
 "../MicADC.c" \
-"../httpget.c" 
+"../StartBIOS.c" \
+"../UART_Mic.c" 
 
 

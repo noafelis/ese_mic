@@ -1,11 +1,11 @@
 ## THIS IS A GENERATED FILE -- DO NOT EDIT
-.configuro: .libraries,em4f linker.cmd package/cfg/httpget_pem4f.oem4f
+.configuro: .libraries,em4f linker.cmd package/cfg/ese_mic_pem4f.oem4f
 
 # To simplify configuro usage in makefiles:
 #     o create a generic linker command file name 
 #     o set modification times of compiler.opt* files to be greater than
 #       or equal to the generated config header
 #
-linker.cmd: package/cfg/httpget_pem4f.xdl
-	$(SED) 's"^\"\(package/cfg/httpget_pem4fcfg.cmd\)\"$""\"C:/Users/noa/workspace_v10/ESE_FML_feat_httpget_EK_TM4C1294XL_TI2/Debug/configPkg/\1\""' package/cfg/httpget_pem4f.xdl > $@
-	-$(SETDATE) -r:max package/cfg/httpget_pem4f.h compiler.opt compiler.opt.defs
+linker.cmd: package/cfg/ese_mic_pem4f.xdl
+	$(SED) 's"^\"\(package/cfg/ese_mic_pem4fcfg.cmd\)\"$""\"C:/Users/noa/workspace_v10/ese_mic/Debug/configPkg/\1\""' package/cfg/ese_mic_pem4f.xdl > $@
+	-$(SETDATE) -r:max package/cfg/ese_mic_pem4f.h compiler.opt compiler.opt.defs
