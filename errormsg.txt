@@ -1,0 +1,15 @@
+Board_initGeneral()
+Board_initGPIO()
+Using MAC address in flash
+Board_initEMAC()
+initializeADCnStuff
+Starting the HTTP GET example
+System provider is set to SysMin. Halt the target to view any SysMin contents in ROV.
+Service Status: DHCPC    : Enabled  :          : 000
+Service Status: DHCPC    : Enabled  : Running  : 000
+Network Added: If-1:192.168.0.17
+Service Status: DHCPC    : Enabled  : Running  : 017
+Sending a HTTP GET request to 'www.example.com'
+ TcpTimeoutRexmt: Retransmit Timeout
+00078.000 TcpTimeoutKeep: Keep Timeout
+Error! code = -102, desc = httpTask: connect failed
