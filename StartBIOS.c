@@ -49,17 +49,20 @@ Event_Handle UART_Event;
 
 
 /******************************************************************************
-* Defines
+* Defines and Bad Global Vars
 *******************************************************************************/
 #define HOSTNAME          "www.example.com"
 #define REQUEST_URI       "/"
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
 
+/*
 double noiseLvlAvg = 0;
 double noiseLvlValues[7];
 uint32_t ADCValues[7];
 int lastNoiseIndex = 0;
+*/
+char *raspiIP = "192.168.0.136";
 
 /******************************************************************************
 * Function Bodies
@@ -95,7 +98,7 @@ void sendADCValuesToPi(double noiseLvlAvg)
 	memset(&piServerAddr, 0, sizeof(piServerAddr));
 	piServerAddr.sin_family	= AF_INET;
 	piServerAddr.sin_port = htons(5011);					//TODO find out correct pi server port
-	inet_pton(AF_INET, "127.0.0.1", &(piServerAddr.sin_addr));	//TODO change IP to pi server IP
+	inet_pton(AF_INET, raspiIP, &(piServerAddr.sin_addr));	//TODO change IP to pi server IP
 
 	// Connect to pi server
 	if (connect(sockd, (struct sockaddr *) &piServerAddr, sizeof(piServerAddr)) < 0)
