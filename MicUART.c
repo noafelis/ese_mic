@@ -45,7 +45,7 @@
 #include <EK_TM4C1294XL.h>
 
 /* Application headers */
-#include "UART_Mic.h"
+#include <MicUART.h>
 
 Event_Handle UART_Event;
 

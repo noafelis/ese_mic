@@ -14,8 +14,8 @@ CMD_SRCS += \
 C_SRCS += \
 ../EK_TM4C1294XL.c \
 ../MicADC.c \
-../StartBIOS.c \
-../UART_Mic.c 
+../MicUART.c \
+../StartBIOS.c 
 
 GEN_CMDS += \
 ./configPkg/linker.cmd 
@@ -30,8 +30,8 @@ GEN_MISC_DIRS += \
 C_DEPS += \
 ./EK_TM4C1294XL.d \
 ./MicADC.d \
-./StartBIOS.d \
-./UART_Mic.d 
+./MicUART.d \
+./StartBIOS.d 
 
 GEN_OPTS += \
 ./configPkg/compiler.opt 
@@ -39,8 +39,8 @@ GEN_OPTS += \
 OBJS += \
 ./EK_TM4C1294XL.obj \
 ./MicADC.obj \
-./StartBIOS.obj \
-./UART_Mic.obj 
+./MicUART.obj \
+./StartBIOS.obj 
 
 GEN_MISC_DIRS__QUOTED += \
 "configPkg\" 
@@ -48,14 +48,14 @@ GEN_MISC_DIRS__QUOTED += \
 OBJS__QUOTED += \
 "EK_TM4C1294XL.obj" \
 "MicADC.obj" \
-"StartBIOS.obj" \
-"UART_Mic.obj" 
+"MicUART.obj" \
+"StartBIOS.obj" 
 
 C_DEPS__QUOTED += \
 "EK_TM4C1294XL.d" \
 "MicADC.d" \
-"StartBIOS.d" \
-"UART_Mic.d" 
+"MicUART.d" \
+"StartBIOS.d" 
 
 GEN_FILES__QUOTED += \
 "configPkg\linker.cmd" \
@@ -64,7 +64,7 @@ GEN_FILES__QUOTED += \
 C_SRCS__QUOTED += \
 "../EK_TM4C1294XL.c" \
 "../MicADC.c" \
-"../StartBIOS.c" \
-"../UART_Mic.c" 
+"../MicUART.c" \
+"../StartBIOS.c" 
 
 
