@@ -41,12 +41,18 @@
 #include "driverlib/adc.h"
 #include "driverlib/sysctl.h"
 
+#include <driverlib/gpio.h>
+#include <driverlib/pin_map.h>
+#include <driverlib/interrupt.h>
+
+
 #include "MicUART.h"
 #include "MicADC.h"
+#include "SendToPi.h"
 
 /* Bad Global Variables */
 Event_Handle UART_Event;
-
+Event_Handle Pi_Event;
 
 /******************************************************************************
 * Defines and Bad Global Vars
@@ -56,81 +62,20 @@ Event_Handle UART_Event;
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
 
+#define SW2 GPIO_PIN_1
+
 /*
 double noiseLvlAvg = 0;
 double noiseLvlValues[7];
 uint32_t ADCValues[7];
 int lastNoiseIndex = 0;
 */
-char *raspiIP = "192.168.0.136";
+//char *raspiIP = "192.168.0.136";
+//uint32_t PORT = 31717;
 
 /******************************************************************************
 * Function Bodies
 *******************************************************************************/
-
-/*
- *  ======== send adc values to pi server ========
- */
-void sendADCValuesToPi(double noiseLvlAvg)
-{
-	int sockd;
-	struct sockaddr_in piServerAddr;
-	char sendBuffer[3072];
-	int round = 1;
-
-	// Construct message to be sent to pi server
-	uint32_t piStringLen = 0;
-	char piString[100];
-	sprintf(piString, "Ambient Noise Level: %.2lf\n", noiseLvlAvg);
-
-	sprintf(sendBuffer, "%s", piString);
-
-	// Create stream socket using TCP
-	//TODO change to UDP?
-	if ((sockd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-	{
-		perror("create socket failed\n");
-    	exit(1);
-	}
-
-
-	// Construct server address
-	memset(&piServerAddr, 0, sizeof(piServerAddr));
-	piServerAddr.sin_family	= AF_INET;
-	piServerAddr.sin_port = htons(5011);					//TODO find out correct pi server port
-	inet_pton(AF_INET, raspiIP, &(piServerAddr.sin_addr));	//TODO change IP to pi server IP
-
-	// Connect to pi server
-	if (connect(sockd, (struct sockaddr *) &piServerAddr, sizeof(piServerAddr)) < 0)
-	{
-		perror("connect to server failed\n");
-    	exit(1);
-	}
-
-	piStringLen = strlen(piString);
-	if (piStringLen < 2)
-	{
-		piStringLen = 3000;		//TODO why?
-	}
-
-	// send string to pi server
-
-	//UDP:	bytesSent = sendto(socketFd, buffer, bufferSize, flags, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
-
-	while (round >= 0)
-	{
-		if (send(sockd, sendBuffer, piStringLen, 0) != piStringLen)
-		{
-			perror("send() error: different nr of bytes than expected");
-		}
-		round--;
-	}
-
-	close(sockd);
-}
-
-
-
 
 /*
  *  ======== netIPAddrHook ========
@@ -164,7 +109,7 @@ int main(void)
 
 	setup_UART_Task(15);
 	setup_ADC_Task();
-
+	setup_Pi_Task();
 
 	/* Start BIOS */
 	BIOS_start();

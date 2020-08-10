@@ -59,6 +59,7 @@
 
 /* Application headers */
 #include "MicADC.h"
+#include "SendToPi.h"
 
 //*************************************************************************
 /* Defines */
@@ -159,10 +160,7 @@ void initializeADCnStuff(void)
 
 	uint32_t buffer;
 	ADCSequenceDataGet(ADC0_BASE, 0, &buffer);
-
-
 }
-
 
 
 static void micADC(void)
@@ -179,16 +177,16 @@ static void micADC(void)
 	{
 	}
 
-
-
 	for (p = 0; p <= 8; p++)
 	{
 		System_printf("AIN9, reading %d = %4d\n", p, value[p]);
 		System_flush();
 	}
 
-//	Task_sleep(500);
-//	Event_post(UART_Event, Event_Id_01);
+	System_printf("About to call sendADCValuesToPi()\n");
+	System_flush();
+	sendADCValuesToPi();
+
 }
 
 

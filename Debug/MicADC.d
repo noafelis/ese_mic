@@ -250,6 +250,7 @@ MicADC.obj: C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/d
 MicADC.obj: C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/driverlib/interrupt.h
 MicADC.obj: C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/driverlib/adc.h
 MicADC.obj: ../MicADC.h
+MicADC.obj: ../SendToPi.h
 
 ../MicADC.c: 
 C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include/stdbool.h: 
@@ -501,3 +502,4 @@ C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/driverlib/pin
 C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/driverlib/interrupt.h: 
 C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/driverlib/adc.h: 
 ../MicADC.h: 
+../SendToPi.h: 
