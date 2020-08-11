@@ -12,7 +12,7 @@ GEN_CMDS__FLAG := -l"configPkg/linker.cmd"
 ORDERED_OBJS += \
 "./EK_TM4C1294XL.obj" \
 "./MicADC.obj" \
-"./SendToPi.obj" \
+"./SendToPi_UDP.obj" \
 "./StartBIOS.obj" \
 "../EK_TM4C1294XL.cmd" \
 $(GEN_CMDS__FLAG) \
@@ -160,8 +160,8 @@ ese_mic.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "EK_TM4C1294XL.obj" "MicADC.obj" "SendToPi.obj" "StartBIOS.obj" 
-	-$(RM) "EK_TM4C1294XL.d" "MicADC.d" "SendToPi.d" "StartBIOS.d" 
+	-$(RM) "EK_TM4C1294XL.obj" "MicADC.obj" "SendToPi_UDP.obj" "StartBIOS.obj" 
+	-$(RM) "EK_TM4C1294XL.d" "MicADC.d" "SendToPi_UDP.d" "StartBIOS.d" 
 	-$(RMDIR) $(GEN_MISC_DIRS__QUOTED)
 	-@echo 'Finished clean'
 	-@echo ' '

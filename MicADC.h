@@ -11,7 +11,7 @@
 void initializeADCnStuff(void);
 static void micADC(void);
 void create_ADC_event(void);
-int setup_ADC_Task(void);
+int setup_ADC_Task(int prio);
 
 extern double noiseLvlAvg;
 extern double noiseLvlValues[7];

@@ -63,7 +63,7 @@
 
 //*************************************************************************
 /* Defines */
-#define TASKSTACKSIZE   512
+#define TASKSTACKSIZE   1024
 
 #define USRBUTTON GPIO_PORTJ_BASE
 #define SW1 GPIO_PIN_0
@@ -201,7 +201,7 @@ void create_ADC_event(void)
 }
 
 
-int setup_ADC_Task(void)
+int setup_ADC_Task(int prio)
 {
 	Task_Params taskParams;
 	Task_Handle ADCHandle;
@@ -214,7 +214,7 @@ int setup_ADC_Task(void)
 	Task_Params_init(&taskParams);
 	taskParams.arg0 = NULL;
 	taskParams.stackSize = 2048;
-	taskParams.priority = 15;		//15: highest priority
+	taskParams.priority = prio;		//15: highest priority
 	ADCHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb);
 	if (ADCHandle == NULL)
 	{

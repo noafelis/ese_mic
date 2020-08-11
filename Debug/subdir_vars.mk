@@ -14,7 +14,7 @@ CMD_SRCS += \
 C_SRCS += \
 ../EK_TM4C1294XL.c \
 ../MicADC.c \
-../SendToPi.c \
+../SendToPi_UDP.c \
 ../StartBIOS.c 
 
 GEN_CMDS += \
@@ -30,7 +30,7 @@ GEN_MISC_DIRS += \
 C_DEPS += \
 ./EK_TM4C1294XL.d \
 ./MicADC.d \
-./SendToPi.d \
+./SendToPi_UDP.d \
 ./StartBIOS.d 
 
 GEN_OPTS += \
@@ -39,7 +39,7 @@ GEN_OPTS += \
 OBJS += \
 ./EK_TM4C1294XL.obj \
 ./MicADC.obj \
-./SendToPi.obj \
+./SendToPi_UDP.obj \
 ./StartBIOS.obj 
 
 GEN_MISC_DIRS__QUOTED += \
@@ -48,13 +48,13 @@ GEN_MISC_DIRS__QUOTED += \
 OBJS__QUOTED += \
 "EK_TM4C1294XL.obj" \
 "MicADC.obj" \
-"SendToPi.obj" \
+"SendToPi_UDP.obj" \
 "StartBIOS.obj" 
 
 C_DEPS__QUOTED += \
 "EK_TM4C1294XL.d" \
 "MicADC.d" \
-"SendToPi.d" \
+"SendToPi_UDP.d" \
 "StartBIOS.d" 
 
 GEN_FILES__QUOTED += \
@@ -64,7 +64,7 @@ GEN_FILES__QUOTED += \
 C_SRCS__QUOTED += \
 "../EK_TM4C1294XL.c" \
 "../MicADC.c" \
-"../SendToPi.c" \
+"../SendToPi_UDP.c" \
 "../StartBIOS.c" 
 
 
