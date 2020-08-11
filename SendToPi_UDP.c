@@ -72,7 +72,7 @@ void sendADCValuesToPi(void)
 	struct sockaddr_in piServAddr;
 	socklen_t addrlen;
 	int status;
-	uint8_t dataBuf[MAXBUF];
+	char sendBuf[MAXBUF];
 	int err;
 
 	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -83,15 +83,21 @@ void sendADCValuesToPi(void)
 		System_flush();
 	}
 
-	memset(dataBuf, 0, sizeof(dataBuf));
-	dataBuf[0] = '\x1b';		//represents escape character
+/*	sendBuf = malloc(MAXBUF);
+	{
+		System_printf("malloc failed\n");
+		System_flush();
+	}
+	*/
+	memset(sendBuf, 0, sizeof(sendBuf));
+	sprintf(sendBuf, "hello dis is cat");
 
 	addrlen = sizeof(struct sockaddr_in);
 	piServAddr.sin_family = AF_INET;
 	piServAddr.sin_port = PORT;
 	piServAddr.sin_addr.s_addr = 0xc0a80088;		//192.168.0.136 -> c0.a8.00.88 (0xc0a80088)
 
-	sendto(sockfd, dataBuf, sizeof(dataBuf), 0, (struct sockaddr*)&piServAddr, addrlen);
+	sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&piServAddr, addrlen);
 
 	localAddr.sin_family = AF_INET;
 	localAddr.sin_port = 0;
@@ -106,14 +112,14 @@ void sendADCValuesToPi(void)
 	}
 
 	addrlen = sizeof(piServAddr);
-	recvfrom(sockfd, dataBuf, MAXBUF, 0, (struct sockaddr*)&piServAddr, &addrlen);
+	recvfrom(sockfd, sendBuf, MAXBUF, 0, (struct sockaddr*)&piServAddr, &addrlen);
 	int i = 0;
 	do
 	{
-		System_printf("response:\n%s", dataBuf[i]);
+		System_printf("response:\n%s", sendBuf[i]);
 		System_flush();
 		i++;
-	} while (dataBuf[i] != 0);
+	} while (sendBuf[i] != 0);
 
 	close(sockfd);
 }

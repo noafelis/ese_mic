@@ -104,7 +104,7 @@ int main(void)
 //	System_printf("Board_initEMAC()\n");
 //	System_flush();
 
-	setup_ADC_Task(10);
+	setup_ADC_Task(5);
 //	setup_Pi_Task();
 
 	/* Start BIOS */
