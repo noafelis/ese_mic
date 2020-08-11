@@ -16,7 +16,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <stdbool.h>
 //#include <errno.h>
 
@@ -47,14 +46,10 @@
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 
-#include "sockets.h"
-
-#include "MicUART.h"
 #include "MicADC.h"
 #include "SendToPi.h"
 
 /* Bad Global Variables */
-Event_Handle UART_Event;
 Event_Handle Pi_Event;
 
 /******************************************************************************
@@ -86,6 +81,8 @@ uint32_t MAXBUF = 1024;
  */
 void sendADCValuesToPi(void)
 {
+	// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/413759
+
 	int sockfd;
 	//struct sockaddr_in piServerAddr;
 	char sendBuffer[3072];
@@ -131,7 +128,7 @@ void sendADCValuesToPi(void)
 		System_flush();
 	}
 
-	System_printf("struct addrinfo: %d, %d, %d, %d", results->ai_flags, results->ai_family, results->ai_socktype, results->ai_protocol);
+	System_printf("struct addrinfo: %d, %d, %d, %d\n\n", results->ai_flags, results->ai_family, results->ai_socktype, results->ai_protocol);
 	System_flush();
 
 
@@ -159,7 +156,7 @@ void sendADCValuesToPi(void)
 
 	if (servaddr == NULL)
 	{
-		System_printf("client failed to connect");
+		System_printf("client failed to connect\n");
 		System_flush();
 	}
 
@@ -194,7 +191,6 @@ void sendADCValuesToPi(void)
 
 
 	//TODO close all the sockets and stuff.
-
 }
 
 
@@ -230,4 +226,3 @@ int setup_Pi_Task(void)
 	}
 	return 0;
 }
-

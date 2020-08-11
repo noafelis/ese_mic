@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <unistd.h>
+
 #include <stdbool.h>
 
 //#include <errno.h>
@@ -45,13 +45,10 @@
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 
-
-#include "MicUART.h"
 #include "MicADC.h"
 #include "SendToPi.h"
 
 /* Bad Global Variables */
-Event_Handle UART_Event;
 Event_Handle Pi_Event;
 
 /******************************************************************************
@@ -107,7 +104,6 @@ int main(void)
 //	System_printf("Board_initEMAC()\n");
 //	System_flush();
 
-	setup_UART_Task(15);
 	setup_ADC_Task();
 	setup_Pi_Task();
 

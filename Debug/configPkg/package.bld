@@ -12,7 +12,7 @@ var Executable = xdc.module('xdc.bld.Executable');
 
 var exeOpts = new Executable.Attrs({
         cfgScript: 'C:/Users/noa/workspace_v10/ese_mic/ese_mic.cfg',
-        profile: 'release',
+        profile: 'debug',
         cfgHome: 'configPkg',
 });
 

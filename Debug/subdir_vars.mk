@@ -14,7 +14,6 @@ CMD_SRCS += \
 C_SRCS += \
 ../EK_TM4C1294XL.c \
 ../MicADC.c \
-../MicUART.c \
 ../SendToPi.c \
 ../StartBIOS.c 
 
@@ -31,7 +30,6 @@ GEN_MISC_DIRS += \
 C_DEPS += \
 ./EK_TM4C1294XL.d \
 ./MicADC.d \
-./MicUART.d \
 ./SendToPi.d \
 ./StartBIOS.d 
 
@@ -41,7 +39,6 @@ GEN_OPTS += \
 OBJS += \
 ./EK_TM4C1294XL.obj \
 ./MicADC.obj \
-./MicUART.obj \
 ./SendToPi.obj \
 ./StartBIOS.obj 
 
@@ -51,14 +48,12 @@ GEN_MISC_DIRS__QUOTED += \
 OBJS__QUOTED += \
 "EK_TM4C1294XL.obj" \
 "MicADC.obj" \
-"MicUART.obj" \
 "SendToPi.obj" \
 "StartBIOS.obj" 
 
 C_DEPS__QUOTED += \
 "EK_TM4C1294XL.d" \
 "MicADC.d" \
-"MicUART.d" \
 "SendToPi.d" \
 "StartBIOS.d" 
 
@@ -69,7 +64,6 @@ GEN_FILES__QUOTED += \
 C_SRCS__QUOTED += \
 "../EK_TM4C1294XL.c" \
 "../MicADC.c" \
-"../MicUART.c" \
 "../SendToPi.c" \
 "../StartBIOS.c" 
 

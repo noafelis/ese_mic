@@ -44,7 +44,7 @@
 /* All the C Utilities */
 #include <stdbool.h>
 #include <stdint.h>
-#include <unistd.h>
+
 #include <inc/hw_memmap.h>
 #include <inc/tm4c1294ncpdt.h>
 #include <inc/hw_types.h>
