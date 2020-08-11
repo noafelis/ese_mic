@@ -13,10 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
 #include <stdbool.h>
-
-//#include <errno.h>
 
 /* XDCtools Header files */
 #include <xdc/std.h>
@@ -34,6 +31,7 @@
 #include <ti/sysbios/knl/Event.h>
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/hal/Hwi.h>
+//#include <ti/ndk/inc/netmain.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -54,8 +52,8 @@
 /******************************************************************************
 * Defines and Bad Global Vars
 *******************************************************************************/
-#define HOSTNAME          "www.example.com"
-#define REQUEST_URI       "/"
+//#define HOSTNAME          "www.example.com"
+//#define REQUEST_URI       "/"
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
 
@@ -86,6 +84,9 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 }
 
 
+
+
+
 /*
  *  ======== main ========
  */
@@ -104,7 +105,10 @@ int main(void)
 //	System_printf("Board_initEMAC()\n");
 //	System_flush();
 
-	setup_ADC_Task(5);
+	setup_ADC_Task(4);
+	createSockThread(5);
+	//void *taskHandle = NULL;
+//	taskHandle = TaskCreate(sendADCValuesToPi, "sendADCValuesToPi", 5, 1024);
 //	setup_Pi_Task();
 
 	/* Start BIOS */

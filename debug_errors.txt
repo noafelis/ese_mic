@@ -1,29 +1,6 @@
-SendtoPi.c: socket() -> socket.h -> socket.c NDK_socket() -> llEnter(); here it dies.  
+program runs until 
+recvfrom(sockfd, sendBuf, MAXBUF, 0, (struct sockaddr*)&piServAddr, &addrlen);
+(line 151 in SendToPi_UDP.c)
 
-
-ti.sysbios.family.arm.m3.Hwi: line 1095: E_hardFault: FORCED
-ti.sysbios.family.arm.m3.Hwi: line 1172: E_busFault: IMPRECISERR: Delayed Bus Fault, exact addr unknown, address: e000ed38
-Exception occurred in ISR thread at PC = 0x0000c852.
-Core 0: Exception occurred in ThreadType_Task.
-Task name: {unknown-instance-name}, handle: 0xe9.
-Task stack base: 0xf8d78a.
-Task stack size: 0x14fc498.
-R0 = 0x00000000  R8  = 0x000151e9
-R1 = 0x00000009  R9  = 0xffffffff
-R2 = 0x2000f7bc  R10 = 0xffffffff
-R3 = 0x2000f818  R11 = 0xffffffff
-R4 = 0x00000200  R12 = 0x00000001
-R5 = 0x000000e9  SP(R13) = 0x2000f828
-R6 = 0x0000ffff  LR(R14) = 0x00000000
-R7 = 0xffffffff  PC(R15) = 0x0000c852
-PSR = 0x2100441e
-ICSR = 0x0041e003
-MMFSR = 0x00
-BFSR = 0x04
-UFSR = 0x0000
-HFSR = 0x40000000
-DFSR = 0x0000000b
-MMAR = 0xe000ed34
-BFAR = 0xe000ed38
-AFSR = 0x00000000
-Terminating execution...
+ti.sysbios.knl.Task: line 383: E_spOutOfBounds: Task 0x20000c20 stack error, SP = 0x200013f4.
+xdc.runtime.Error.raise: terminating execution
