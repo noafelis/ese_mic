@@ -59,7 +59,7 @@
 
 /* Application headers */
 #include "MicADC.h"
-#include "SendToPi.h"
+#include "SendToPi_UDP.h"
 
 //*************************************************************************
 /* Defines */
@@ -186,7 +186,6 @@ static void micADC(void)
 	System_printf("About to call sendADCValuesToPi()\n");
 	System_flush();
 	sendADCValuesToPi();
-
 }
 
 

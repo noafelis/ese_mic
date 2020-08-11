@@ -46,10 +46,10 @@
 #include <driverlib/interrupt.h>
 
 #include "MicADC.h"
-#include "SendToPi.h"
+#include "SendToPi_UDP.h"
 
 /* Bad Global Variables */
-Event_Handle Pi_Event;
+//Event_Handle Pi_Event;
 
 /******************************************************************************
 * Defines and Bad Global Vars
@@ -105,7 +105,7 @@ int main(void)
 //	System_flush();
 
 	setup_ADC_Task();
-	setup_Pi_Task();
+//	setup_Pi_Task();
 
 	/* Start BIOS */
 	BIOS_start();

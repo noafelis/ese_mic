@@ -50,7 +50,7 @@
 #include "SendToPi.h"
 
 /* Bad Global Variables */
-Event_Handle Pi_Event;
+//Event_Handle Pi_Event;
 
 /******************************************************************************
 * Defines and Bad Global Vars
@@ -193,7 +193,7 @@ void sendADCValuesToPi(void)
 	//TODO close all the sockets and stuff.
 }
 
-
+/*
 void create_Pi_event(void)
 {
 	Error_Block eb;
@@ -226,3 +226,4 @@ int setup_Pi_Task(void)
 	}
 	return 0;
 }
+*/
