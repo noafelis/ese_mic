@@ -183,16 +183,6 @@ void micADC(void)
 		System_flush();
 	}
 
-	Semaphore_Params_init(&semParams);
-	Error_Block eb;
-	Error_init(&eb);
-	semHandle = Semaphore_create(0, &semParams, &eb);
-	if (semHandle == NULL)
-	{
-		System_printf("Semaphore_create() failed\n");
-		System_flush();
-	}
-
 	System_printf("About to call Semaphore_post()\n");
 	System_flush();
 	Semaphore_post(semHandle);

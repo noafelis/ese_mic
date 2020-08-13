@@ -120,12 +120,27 @@ int main(void)
 	System_flush();
 */
 
-/*
+	System_printf("Calling Semaphore_create()\n");
+	System_flush();
+
+	Semaphore_Params_init(&semParams);
+	semParams.mode = Semaphore_Mode_BINARY;
+
+	Error_Block eb;
+	Error_init(&eb);
+	semHandle = Semaphore_create(0, &semParams, &eb);
+	if (semHandle == NULL)
+	{
+		System_printf("Semaphore_create() failed\n");
+		System_flush();
+	}
+
+
 	System_printf("createSockThread(5)\n");
 	System_flush();
 //	createSockThread(5);
 	netIPAddrHook();
-*/
+
 
 	System_printf("setup_ADC_Task(4)\n");
 	System_flush();
