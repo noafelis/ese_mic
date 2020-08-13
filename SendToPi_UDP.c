@@ -1,22 +1,16 @@
-/*
- * SendToPi.c
- *
- *  Created on: 8 Aug 2020
- *      Author: noa
- */
-
 /******************************************************************************
 * Includes
 *******************************************************************************/
 #include "Board.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
+//#include <netinet/in.h>
+//#include <arpa/inet.h>
+
 
 /* XDCtools Header files */
 #include <xdc/std.h>
@@ -34,6 +28,7 @@
 #include <ti/sysbios/knl/Event.h>
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/hal/Hwi.h>
+
 //#include <ti/ndk/inc/netmain.h>
 
 #include "inc/hw_memmap.h"
@@ -51,7 +46,6 @@
 
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
-#define UDPPORT 1000
 
 const char *RPI_IP = "192.168.0.136";
 const char *PORT_INT = "31717";
@@ -83,6 +77,7 @@ void sendADCValuesToPi(void)
 //	int value;
 
 	socklen_t addrlen;
+	//uint32_t addrlen;
 	int status;
 	char sendBuf[MAXBUF];
 	int err;
@@ -174,7 +169,7 @@ void sendADCValuesToPi(void)
 	fdCloseSession((void *)Task_self());
 }
 
-
+/*
 void createSockThread(int prio)
 {
 	//int status;
@@ -194,3 +189,4 @@ void createSockThread(int prio)
 		System_flush();
 	}
 }
+*/

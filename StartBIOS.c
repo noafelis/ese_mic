@@ -3,8 +3,8 @@
  */
 
 /******************************************************************************
-* Includes
-*******************************************************************************/
+ * Includes
+ *******************************************************************************/
 #include "Board.h"
 
 #include <stdio.h>
@@ -48,44 +48,60 @@
 
 /* Bad Global Variables */
 //Event_Handle Pi_Event;
-
 /******************************************************************************
-* Defines and Bad Global Vars
-*******************************************************************************/
+ * Defines and Bad Global Vars
+ *******************************************************************************/
 //#define HOSTNAME          "www.example.com"
 //#define REQUEST_URI       "/"
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
-#define HTTPTASKSTACKSIZE 4096
+#define UDPTASKSTACKSIZE 4096
+#define UDPPORT 31717
 
 #define SW2 GPIO_PIN_1
 
 /*
-double noiseLvlAvg = 0;
-double noiseLvlValues[7];
-uint32_t ADCValues[7];
-int lastNoiseIndex = 0;
-*/
+ double noiseLvlAvg = 0;
+ double noiseLvlValues[7];
+ uint32_t ADCValues[7];
+ int lastNoiseIndex = 0;
+ */
 //char *raspiIP = "192.168.0.136";
 //uint32_t PORT = 31717;
-
 /******************************************************************************
-* Function Bodies
-*******************************************************************************/
+ * Function Bodies
+ *******************************************************************************/
 
 /*
  *  ======== netIPAddrHook ========
  *  This function is called when IP Addr is added/deleted
  */
 
-void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
+void netIPAddrHook(void)
 {
-	System_printf("inside netIPAddrHook()\n");
-	System_flush();
+	Task_Handle taskHandle;
+	Task_Params taskParams;
+	Error_Block eb;
+	int err;
+
+	/* Create a HTTP task when the IP address is added */
+	Error_init(&eb);
+
+	/*
+	 *  Create the Task that handles UDP "connections."
+	 *  arg0 will be the port that this task listens to.
+	 */
+	Task_Params_init(&taskParams);
+	taskParams.stackSize = UDPTASKSTACKSIZE;
+	taskParams.priority = 1;
+	taskParams.arg0 = UDPPORT;
+	taskHandle = Task_create((Task_FuncPtr) sendADCValuesToPi, &taskParams, &eb);
+	if (taskHandle == NULL)
+	{
+		err = fdError();
+		System_printf("netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n", err);
+		System_flush();
+	}
 }
-
-
-
-
 
 /*
  *  ======== main ========
@@ -105,9 +121,11 @@ int main(void)
 //	System_printf("Board_initEMAC()\n");
 //	System_flush();
 
+/*
 	System_printf("createSockThread(5)\n");
 	System_flush();
 	createSockThread(5);
+*/
 
 	System_printf("setup_ADC_Task(4)\n");
 	System_flush();
@@ -117,7 +135,6 @@ int main(void)
 	//void *taskHandle = NULL;
 //	taskHandle = TaskCreate(sendADCValuesToPi, "sendADCValuesToPi", 5, 1024);
 //	setup_Pi_Task();
-
 	/* Start BIOS */
 	BIOS_start();
 

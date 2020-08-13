@@ -9,7 +9,7 @@
 #define MICADC_H_
 
 void initializeADCnStuff(void);
-static void micADC(void);
+void micADC(void);
 void create_ADC_event(void);
 int setup_ADC_Task(int prio);
 

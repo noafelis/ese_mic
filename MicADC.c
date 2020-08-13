@@ -157,7 +157,7 @@ void initializeADCnStuff(void)
 }
 
 
-static void micADC(void)
+void micADC(void)
 {
 	uint32_t value[7];
 
