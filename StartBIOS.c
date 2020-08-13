@@ -138,8 +138,8 @@ int main(void)
 
 	System_printf("createSockThread(5)\n");
 	System_flush();
-//	createSockThread(5);
-	netIPAddrHook();
+	createSockThread(5);
+//	netIPAddrHook();
 
 
 	System_printf("setup_ADC_Task(4)\n");

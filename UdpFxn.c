@@ -52,7 +52,7 @@ Semaphore_Struct sem0Struct;
 Semaphore_Params semParams;
 
 const char *RPI_IP = "192.168.0.136";
-const char *PORT_INT = "31717";
+const char *PORT_STR = "31717";
 uint32_t PORT = 31717;
 uint32_t MAXBUF = 1024;
 
@@ -175,7 +175,7 @@ void UdpFxn(void)
 	fdCloseSession((void *)Task_self());
 }
 
-/*
+
 void createSockThread(int prio)
 {
 	//int status;
@@ -195,4 +195,4 @@ void createSockThread(int prio)
 		System_flush();
 	}
 }
-*/
+
