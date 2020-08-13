@@ -51,6 +51,7 @@
 
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
+#define UDPPORT 1000
 
 const char *RPI_IP = "192.168.0.136";
 const char *PORT_INT = "31717";
@@ -131,9 +132,14 @@ void sendADCValuesToPi(void)
 	addrlen = sizeof(struct sockaddr_in);
 	piServAddr.sin_family = AF_INET;
 	piServAddr.sin_port = PORT;
-	piServAddr.sin_addr.s_addr = 0xc0a80088;		//192.168.0.136 -> c0.a8.00.88 (0xc0a80088)
+	piServAddr.sin_addr.s_addr = INADDR_ANY;		//192.168.0.136 -> c0.a8.00.88 (0xc0a80088)
 
-	sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&piServAddr, addrlen);
+	if ((sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&piServAddr, addrlen) < 0))
+	{
+		err = fdError();
+		System_printf("sendto() failed: err=%d\n", err);
+		System_flush();
+	}
 
 	localAddr.sin_family = AF_INET;
 	localAddr.sin_port = 0;
@@ -148,7 +154,12 @@ void sendADCValuesToPi(void)
 	}
 
 	addrlen = sizeof(piServAddr);
-	recvfrom(sockfd, sendBuf, MAXBUF, 0, (struct sockaddr*)&piServAddr, &addrlen);
+	if ((recvfrom(sockfd, sendBuf, MAXBUF, 0, (struct sockaddr*)&piServAddr, &addrlen) < 0))
+	{
+		err = fdError();
+		System_printf("recvfrom() failed: err=%d\n", err);
+		System_flush();
+	}
 	int i = 0;
 	System_printf("response:\n");
 	do

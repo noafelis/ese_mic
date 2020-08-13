@@ -84,12 +84,6 @@ static void micADC(void);
 
 void initializeADCnStuff(void)
 {
-	/* Call board init functions */
-//	Board_initGeneral();
-	// Board_initEMAC();
-//	Board_initGPIO();
-	Board_initI2C();
-
 	//Aktivieren der GPIO Ports, an denen das ADC Interface angeschlossen sein soll
 	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
 
@@ -104,15 +98,15 @@ void initializeADCnStuff(void)
 	/* Set pin 0 of GPIO port J to digital input */
 	GPIOPinTypeGPIOInput(USRBUTTON, SW1);
 	/* Set pin 1 of GPIO port J to digital input */
-	GPIOPinTypeGPIOInput(USRBUTTON, SW2);
+//	GPIOPinTypeGPIOInput(USRBUTTON, SW2);
 
 	/* Enable pull-up for button on pin 0 of port J damit er auf Druck reagiert und strom tut */
 	GPIOPadConfigGet(USRBUTTON, SW1, &ui32Strength, &ui32PinType);
 	GPIOPadConfigSet(USRBUTTON, SW1, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
 
 	/* Enable pull-up for button on pin 1 of port J damit er auf Druck reagiert und strom tut */
-	GPIOPadConfigGet(USRBUTTON, SW2, &ui32Strength, &ui32PinType);
-	GPIOPadConfigSet(USRBUTTON, SW2, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
+//	GPIOPadConfigGet(USRBUTTON, SW2, &ui32Strength, &ui32PinType);
+//	GPIOPadConfigSet(USRBUTTON, SW2, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
 
 	//*************************************************************************
 	/*=========================== ADC config ===========================*/

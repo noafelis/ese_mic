@@ -105,8 +105,15 @@ int main(void)
 //	System_printf("Board_initEMAC()\n");
 //	System_flush();
 
-	setup_ADC_Task(4);
+	System_printf("createSockThread(5)\n");
+	System_flush();
 	createSockThread(5);
+
+	System_printf("setup_ADC_Task(4)\n");
+	System_flush();
+	setup_ADC_Task(4);
+
+
 	//void *taskHandle = NULL;
 //	taskHandle = TaskCreate(sendADCValuesToPi, "sendADCValuesToPi", 5, 1024);
 //	setup_Pi_Task();
