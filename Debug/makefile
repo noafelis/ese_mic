@@ -12,8 +12,8 @@ GEN_CMDS__FLAG := -l"configPkg/linker.cmd"
 ORDERED_OBJS += \
 "./EK_TM4C1294XL.obj" \
 "./MicADC.obj" \
-"./SendToPi_UDP.obj" \
 "./StartBIOS.obj" \
+"./UdpFxn.obj" \
 "../EK_TM4C1294XL.cmd" \
 $(GEN_CMDS__FLAG) \
 -l"C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/grlib/ccs/Debug/grlib.lib" \
@@ -160,8 +160,8 @@ ese_mic.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "EK_TM4C1294XL.obj" "MicADC.obj" "SendToPi_UDP.obj" "StartBIOS.obj" 
-	-$(RM) "EK_TM4C1294XL.d" "MicADC.d" "SendToPi_UDP.d" "StartBIOS.d" 
+	-$(RM) "EK_TM4C1294XL.obj" "MicADC.obj" "StartBIOS.obj" "UdpFxn.obj" 
+	-$(RM) "EK_TM4C1294XL.d" "MicADC.d" "StartBIOS.d" "UdpFxn.d" 
 	-$(RMDIR) $(GEN_MISC_DIRS__QUOTED)
 	-@echo 'Finished clean'
 	-@echo ' '

@@ -40,12 +40,16 @@
 #include <driverlib/gpio.h>
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
+#include <UdpFxn.h>
 
 #include "MicADC.h"
-#include "SendToPi_UDP.h"
 
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
+
+Semaphore_Handle semHandle;
+Semaphore_Struct sem0Struct;
+Semaphore_Params semParams;
 
 const char *RPI_IP = "192.168.0.136";
 const char *PORT_INT = "31717";
@@ -63,8 +67,10 @@ uint32_t MAXBUF = 1024;
  *  ======== send adc values to pi server ========
  */
 // https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/555107?NDK-socket-creation-error
-void sendADCValuesToPi(void)
+void UdpFxn(void)
 {
+	Semaphore_pend(semHandle, BIOS_WAIT_FOREVER);
+
 	fdOpenSession((void *)Task_self());
 
 	int sockfd;
@@ -79,7 +85,7 @@ void sendADCValuesToPi(void)
 	socklen_t addrlen;
 	//uint32_t addrlen;
 	int status;
-	char sendBuf[MAXBUF];
+	char *sendBuf = NULL;
 	int err;
 
 	memset(&hints, 0, sizeof(hints));
@@ -121,7 +127,7 @@ void sendADCValuesToPi(void)
 	}
 
 
-	memset(sendBuf, 0, sizeof(sendBuf));
+	//memset(sendBuf, 0, sizeof("150"));
 	sprintf(sendBuf, "150");
 
 	addrlen = sizeof(struct sockaddr_in);
@@ -181,7 +187,7 @@ void createSockThread(int prio)
     params.priority = prio;
     params.stackSize = 2048;
 
-	mySockThread = Task_create((Task_FuncPtr)sendADCValuesToPi, &params, NULL);
+	mySockThread = Task_create((Task_FuncPtr)UdpFxn, &params, NULL);
 
 	if (!mySockThread)
 	{

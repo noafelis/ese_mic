@@ -222,6 +222,17 @@ MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/pa
 MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/drivers/I2C.h
 MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/drivers/UART.h
 MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/drivers/WiFi.h
+MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Semaphore.h
+MicADC.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Types.h
+MicADC.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/IInstance.h
+MicADC.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Diags.h
+MicADC.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Log.h
+MicADC.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Assert.h
+MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Queue.h
+MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Task.h
+MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Clock.h
+MicADC.obj: C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/IModule.h
+MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Event.h
 MicADC.obj: ../Board.h
 MicADC.obj: ../EK_TM4C1294XL.h
 MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/inc/tm4c1294ncpdt.h
@@ -233,7 +244,7 @@ MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/d
 MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/driverlib/interrupt.h
 MicADC.obj: C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/driverlib/adc.h
 MicADC.obj: ../MicADC.h
-MicADC.obj: ../SendToPi_UDP.h
+MicADC.obj: C:/Users/noa/workspace_v10/ese_mic/UdpFxn.h
 
 ../MicADC.c: 
 C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include/stdbool.h: 
@@ -457,6 +468,17 @@ C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/dr
 C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/drivers/I2C.h: 
 C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/drivers/UART.h: 
 C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/drivers/WiFi.h: 
+C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Semaphore.h: 
+C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Types.h: 
+C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/IInstance.h: 
+C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Diags.h: 
+C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Log.h: 
+C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/Assert.h: 
+C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Queue.h: 
+C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Task.h: 
+C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Clock.h: 
+C:/ti/xdctools_3_32_00_06_core/packages/xdc/runtime/IModule.h: 
+C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/ti/sysbios/knl/Event.h: 
 ../Board.h: 
 ../EK_TM4C1294XL.h: 
 C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/inc/tm4c1294ncpdt.h: 
@@ -468,4 +490,4 @@ C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/driverlib/pin
 C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/driverlib/interrupt.h: 
 C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b/driverlib/adc.h: 
 ../MicADC.h: 
-../SendToPi_UDP.h: 
+C:/Users/noa/workspace_v10/ese_mic/UdpFxn.h: 

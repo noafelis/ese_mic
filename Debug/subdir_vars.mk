@@ -14,8 +14,8 @@ CMD_SRCS += \
 C_SRCS += \
 ../EK_TM4C1294XL.c \
 ../MicADC.c \
-../SendToPi_UDP.c \
-../StartBIOS.c 
+../StartBIOS.c \
+../UdpFxn.c 
 
 GEN_CMDS += \
 ./configPkg/linker.cmd 
@@ -30,8 +30,8 @@ GEN_MISC_DIRS += \
 C_DEPS += \
 ./EK_TM4C1294XL.d \
 ./MicADC.d \
-./SendToPi_UDP.d \
-./StartBIOS.d 
+./StartBIOS.d \
+./UdpFxn.d 
 
 GEN_OPTS += \
 ./configPkg/compiler.opt 
@@ -39,8 +39,8 @@ GEN_OPTS += \
 OBJS += \
 ./EK_TM4C1294XL.obj \
 ./MicADC.obj \
-./SendToPi_UDP.obj \
-./StartBIOS.obj 
+./StartBIOS.obj \
+./UdpFxn.obj 
 
 GEN_MISC_DIRS__QUOTED += \
 "configPkg\" 
@@ -48,14 +48,14 @@ GEN_MISC_DIRS__QUOTED += \
 OBJS__QUOTED += \
 "EK_TM4C1294XL.obj" \
 "MicADC.obj" \
-"SendToPi_UDP.obj" \
-"StartBIOS.obj" 
+"StartBIOS.obj" \
+"UdpFxn.obj" 
 
 C_DEPS__QUOTED += \
 "EK_TM4C1294XL.d" \
 "MicADC.d" \
-"SendToPi_UDP.d" \
-"StartBIOS.d" 
+"StartBIOS.d" \
+"UdpFxn.d" 
 
 GEN_FILES__QUOTED += \
 "configPkg\linker.cmd" \
@@ -64,7 +64,7 @@ GEN_FILES__QUOTED += \
 C_SRCS__QUOTED += \
 "../EK_TM4C1294XL.c" \
 "../MicADC.c" \
-"../SendToPi_UDP.c" \
-"../StartBIOS.c" 
+"../StartBIOS.c" \
+"../UdpFxn.c" 
 
 

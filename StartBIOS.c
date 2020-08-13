@@ -42,9 +42,9 @@
 #include <driverlib/gpio.h>
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
+#include <UdpFxn.h>
 
 #include "MicADC.h"
-#include "SendToPi_UDP.h"
 
 /* Bad Global Variables */
 //Event_Handle Pi_Event;
@@ -59,14 +59,11 @@
 
 #define SW2 GPIO_PIN_1
 
-/*
- double noiseLvlAvg = 0;
- double noiseLvlValues[7];
- uint32_t ADCValues[7];
- int lastNoiseIndex = 0;
- */
-//char *raspiIP = "192.168.0.136";
-//uint32_t PORT = 31717;
+
+Semaphore_Handle semHandle;
+Semaphore_Struct sem0Struct;
+Semaphore_Params semParams;
+
 /******************************************************************************
  * Function Bodies
  *******************************************************************************/
@@ -94,7 +91,7 @@ void netIPAddrHook(void)
 	taskParams.stackSize = UDPTASKSTACKSIZE;
 	taskParams.priority = 1;
 	taskParams.arg0 = UDPPORT;
-	taskHandle = Task_create((Task_FuncPtr) sendADCValuesToPi, &taskParams, &eb);
+	taskHandle = Task_create((Task_FuncPtr)UdpFxn, &taskParams, &eb);
 	if (taskHandle == NULL)
 	{
 		err = fdError();
@@ -117,14 +114,17 @@ int main(void)
 	System_printf("Board_initGPIO()\n");
 	System_flush();
 
-//	Board_initEMAC();
-//	System_printf("Board_initEMAC()\n");
-//	System_flush();
+/*
+	Board_initEMAC();
+	System_printf("Board_initEMAC()\n");
+	System_flush();
+*/
 
 /*
 	System_printf("createSockThread(5)\n");
 	System_flush();
-	createSockThread(5);
+//	createSockThread(5);
+	netIPAddrHook();
 */
 
 	System_printf("setup_ADC_Task(4)\n");
@@ -132,9 +132,10 @@ int main(void)
 	setup_ADC_Task(4);
 
 
-	//void *taskHandle = NULL;
+//	void *taskHandle = NULL;
 //	taskHandle = TaskCreate(sendADCValuesToPi, "sendADCValuesToPi", 5, 1024);
 //	setup_Pi_Task();
+
 	/* Start BIOS */
 	BIOS_start();
 

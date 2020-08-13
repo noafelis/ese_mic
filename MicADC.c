@@ -36,6 +36,7 @@
 // #include <ti/drivers/USBMSCHFatFs.h>
 // #include <ti/drivers/Watchdog.h>
 #include <ti/drivers/WiFi.h>
+#include <ti/sysbios/knl/Semaphore.h>
 
 /* Board Header file */
 #include "Board.h"
@@ -59,7 +60,7 @@
 
 /* Application headers */
 #include "MicADC.h"
-#include "SendToPi_UDP.h"
+#include <UdpFxn.h>
 
 //*************************************************************************
 /* Defines */
@@ -68,6 +69,10 @@
 #define USRBUTTON GPIO_PORTJ_BASE
 #define SW1 GPIO_PIN_0
 #define SW2 GPIO_PIN_1
+
+Semaphore_Handle semHandle;
+Semaphore_Struct sem0Struct;
+Semaphore_Params semParams;
 
 //*************************************************************************
 /* Global vars */
@@ -78,7 +83,7 @@ Event_Handle ADC_Event;
 //*************************************************************************
 /* Fctn declarations */
 interrupt void micISR(void);
-static void micADC(void);
+void micADC(void);
 
 //*************************************************************************
 
@@ -169,6 +174,7 @@ void micADC(void)
 
 	while(!ADCIntStatus(ADC0_BASE, 0, false))
 	{
+		// wait for usrbutton1 to be pressed, creating interrupt
 	}
 
 	for (p = 0; p <= 8; p++)
@@ -177,9 +183,23 @@ void micADC(void)
 		System_flush();
 	}
 
-	System_printf("About to call sendADCValuesToPi()\n");
+	Semaphore_Params_init(&semParams);
+	Error_Block eb;
+	Error_init(&eb);
+	semHandle = Semaphore_create(0, &semParams, &eb);
+	if (semHandle == NULL)
+	{
+		System_printf("Semaphore_create() failed\n");
+		System_flush();
+	}
+
+	System_printf("About to call Semaphore_post()\n");
 	System_flush();
-	sendADCValuesToPi();
+	Semaphore_post(semHandle);
+
+//	System_printf("About to call sendADCValuesToPi()\n");
+//	System_flush();
+//	UdpFxn();
 }
 
 
