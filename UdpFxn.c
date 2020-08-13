@@ -1,3 +1,18 @@
+//--------------------------------------------------------------------------------------------------------
+/******************************************************************************
+ * https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.4.0/com.ibm.zos.v2r4.hala001/syserret.htm
+ *
+ *
+ * connect() failed: err=6
+ * 6	ENXIO	All	The device or driver was not found.	Check status of the device attempting to access.
+ *
+ * sendto() failed: err=22
+ * 22	EINVAL	All types	An incorrect argument was specified.	Check the validity of function parameters.
+ *
+ *
+*******************************************************************************/
+//--------------------------------------------------------------------------------------------------------
+
 /******************************************************************************
 * Includes
 *******************************************************************************/
@@ -10,7 +25,6 @@
 #include <sys/socket.h>
 //#include <netinet/in.h>
 //#include <arpa/inet.h>
-
 
 /* XDCtools Header files */
 #include <xdc/std.h>
@@ -25,11 +39,12 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-#include <ti/sysbios/knl/Event.h>
-#include <ti/sysbios/knl/Semaphore.h>
-#include <ti/sysbios/hal/Hwi.h>
+//#include <ti/sysbios/knl/Event.h>
+//#include <ti/sysbios/knl/Semaphore.h>
+//#include <ti/sysbios/hal/Hwi.h>
 
 //#include <ti/ndk/inc/netmain.h>
+//#include <ti/ndk/inc/_nettool.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -42,18 +57,13 @@
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
 
-#include "MicADC.h"
-
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
 
-Semaphore_Handle semHandle;
-Semaphore_Struct sem0Struct;
-Semaphore_Params semParams;
-
 const char *RPI_IP = "192.168.0.136";
-const char *PORT_INT = "31717";
+const char *PORT_STR = "31717";
 uint32_t PORT = 31717;
+const char *SERVIP_STR = "192.168.0.136";
 uint32_t MAXBUF = 1024;
 
 /******************************************************************************
@@ -69,113 +79,103 @@ uint32_t MAXBUF = 1024;
 // https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/555107?NDK-socket-creation-error
 void UdpFxn(void)
 {
-	Semaphore_pend(semHandle, BIOS_WAIT_FOREVER);
-
 	fdOpenSession((void *)Task_self());
 
+	int err = NULL;
 	int sockfd;
-	struct sockaddr_in localAddr;
-	struct sockaddr_in piServAddr;
+//	struct sockaddr_in servAddr;
+//	socklen_t addrlen;
+	char *sendBuf = "1";
 
-	struct addrinfo hints;
-//	struct addrinfo *results = NULL;
-//	struct addrinfo *servaddr = NULL;
-//	int value;
 
-	socklen_t addrlen;
-	//uint32_t addrlen;
-	int status;
-	char *sendBuf = NULL;
-	int err;
-
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_protocol = IPPROTO_UDP;
-
-/*
-	if ((value = getaddrinfo(RPI_IP, PORT_INT, &hints, &results)) < 0)
-	{
-		System_printf("getaddrinfo failed: 0x%x\n", fdError());
-		System_flush();
-		if (value == -2 || value == 11004)
-		{
-			System_printf("unrecognized IP address\n");
-			System_flush();
-		}
-		System_flush();
-	}
-
-	for (servaddr = results; servaddr != NULL; servaddr = servaddr->ai_next)
-	{
-		if ((sockfd = socket(results->ai_family, SOCK_DGRAM, IPPROTO_UDP)) < 0)
-		{
-			err = fdError();
-			System_printf("socket() failed: err=%d\n", err);
-			System_flush();
-			continue;
-		}
-	}
-*/
-
- 	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+/*	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (sockfd == -1)
 	{
 		err = fdError();
 		System_printf("socket() failed: err=%d\n", err);
 		System_flush();
 	}
+*/
+
+	struct addrinfo hints;
+	struct addrinfo *result, *rp;
+	int s;
 
 
-	//memset(sendBuf, 0, sizeof("150"));
-	sprintf(sendBuf, "150");
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+	hints.ai_socktype = SOCK_DGRAM; /* Datagram socket */
+	hints.ai_flags = 0;
+	hints.ai_protocol = 0;          /* Any protocol */
 
+	s = getaddrinfo(SERVIP_STR, PORT_STR, &hints, &result);
+	err = NULL;
+	if (s != 0)
+	{
+		err = fdError();
+		System_printf("getaddrinfo() failed: err=%d\n", err);
+		System_flush();
+	}
+
+	for (rp = result; rp != NULL; rp = rp->ai_next)
+	{
+		sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		err = NULL;
+		if (sockfd < 0)
+		{
+			err = fdError();
+			System_printf("socket() failed, err=%d\n", err);
+			System_flush();
+			continue;
+		}
+		if (sockfd > 0)
+		{
+			System_printf("Huzzah, a socket!\n");
+			System_flush();
+//			break;
+		}
+
+		err = NULL;
+		if (connect(sockfd,rp->ai_addr, rp->ai_addrlen) < 0)
+		{
+			err = fdError();
+			System_printf("connect() failed: err=%d\n", err);
+			System_flush();
+			continue;
+		}
+		break;
+	}
+
+/*	memset(&servAddr, 0, sizeof(servAddr));
 	addrlen = sizeof(struct sockaddr_in);
-	piServAddr.sin_family = AF_INET;
-	piServAddr.sin_port = PORT;
-	piServAddr.sin_addr.s_addr = INADDR_ANY;		//192.168.0.136 -> c0.a8.00.88 (0xc0a80088)
+	servAddr.sin_family = AF_INET;
+	servAddr.sin_port = PORT;
+	servAddr.sin_addr.s_addr = inet_pton(AF_INET, SERVIP_STR, buf);		//192.168.0.136 -> c0.a8.00.88 (0xc0a80088)
+*/
 
-	if ((sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&piServAddr, addrlen) < 0))
+/*	err = NULL;
+	//if (connect (sockfd, (struct sockaddr*) &servAddr, sizeof(servAddr)) < 0)
+	if (connect(sockfd,rp->ai_addr, rp->ai_addrlen) < 0)
+	{
+		err = fdError();
+		System_printf("connect() failed: err=%d\n", err);
+		System_flush();
+	}
+*/
+	//if ((sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen) < 0))
+	if (sendto(sockfd, sendBuf, sizeof(sendBuf), 0, rp->ai_addr, rp->ai_addrlen) < 0)
 	{
 		err = fdError();
 		System_printf("sendto() failed: err=%d\n", err);
 		System_flush();
 	}
 
-	localAddr.sin_family = AF_INET;
-	localAddr.sin_port = 0;
-	localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-	status = bind(sockfd, (struct sockaddr *)&localAddr, addrlen);
-	if (status == -1)
-	{
-		err = fdError();
-		System_printf("bind() failed: err=%d\n", err);
-		System_flush();
-	}
-
-	addrlen = sizeof(piServAddr);
-	if ((recvfrom(sockfd, sendBuf, MAXBUF, 0, (struct sockaddr*)&piServAddr, &addrlen) < 0))
-	{
-		err = fdError();
-		System_printf("recvfrom() failed: err=%d\n", err);
-		System_flush();
-	}
-	int i = 0;
-	System_printf("response:\n");
-	do
-	{
-		System_printf("%s\n", sendBuf[i]);
-		System_flush();
-		i++;
-	} while (sendBuf[i] != 0);
-
 	close(sockfd);
 
 	fdCloseSession((void *)Task_self());
 }
 
-/*
+
 void createSockThread(int prio)
 {
 	//int status;
@@ -195,4 +195,4 @@ void createSockThread(int prio)
 		System_flush();
 	}
 }
-*/
+

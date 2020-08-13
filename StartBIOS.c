@@ -31,7 +31,6 @@
 #include <ti/sysbios/knl/Event.h>
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/hal/Hwi.h>
-//#include <ti/ndk/inc/netmain.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -43,8 +42,6 @@
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
-
-#include "MicADC.h"
 
 /* Bad Global Variables */
 //Event_Handle Pi_Event;
@@ -58,11 +55,6 @@
 #define UDPPORT 31717
 
 #define SW2 GPIO_PIN_1
-
-
-Semaphore_Handle semHandle;
-Semaphore_Struct sem0Struct;
-Semaphore_Params semParams;
 
 /******************************************************************************
  * Function Bodies
@@ -120,31 +112,10 @@ int main(void)
 	System_flush();
 */
 
-	System_printf("Calling Semaphore_create()\n");
-	System_flush();
-
-	Semaphore_Params_init(&semParams);
-	semParams.mode = Semaphore_Mode_BINARY;
-
-	Error_Block eb;
-	Error_init(&eb);
-	semHandle = Semaphore_create(0, &semParams, &eb);
-	if (semHandle == NULL)
-	{
-		System_printf("Semaphore_create() failed\n");
-		System_flush();
-	}
-
-
 	System_printf("createSockThread(5)\n");
 	System_flush();
-//	createSockThread(5);
-	netIPAddrHook();
-
-
-	System_printf("setup_ADC_Task(4)\n");
-	System_flush();
-	setup_ADC_Task(4);
+	createSockThread(5);
+//	netIPAddrHook();
 
 
 //	void *taskHandle = NULL;

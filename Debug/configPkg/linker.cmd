@@ -9,7 +9,7 @@
  */
 
 
--l"C:\Users\noa\workspace_v10\ese_mic\Debug\configPkg\package\cfg\ese_mic_pem4f.oem4f"
+-l"C:\Users\noa\workspace_v10\ese_mic_UDPonly\Debug\configPkg\package\cfg\ese_mic_pem4f.oem4f"
 -l"C:\ti\tirtos_tivac_2_16_01_14\products\ns_1_11_00_10\packages\ti\net\http\lib\http_ndk.aem4f"
 -l"C:\ti\tirtos_tivac_2_16_01_14\products\ns_1_11_00_10\packages\ti\net\lib\network_ndk.aem4f"
 -l"C:\ti\tirtos_tivac_2_16_01_14\products\ndk_2_25_00_09\packages\ti\ndk\hal\timer_bios\lib\hal_timer_bios.aem4f"
@@ -29,7 +29,7 @@
 -l"C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/drivers/lib/drivers_wifi_tivaware.aem4f"
 -l"C:\ti\tirtos_tivac_2_16_01_14\products\tidrivers_tivac_2_16_01_13\packages\ti\mw\fatfs\lib\release\ti.mw.fatfs.aem4f"
 -l"C:/ti/tirtos_tivac_2_16_01_14/products/tidrivers_tivac_2_16_01_13/packages/ti/drivers/ports/lib/tirtosport.aem4f"
--l"C:\Users\noa\workspace_v10\ese_mic\src\sysbios\sysbios.aem4f"
+-l"C:\Users\noa\workspace_v10\ese_mic_UDPonly\src\sysbios\sysbios.aem4f"
 -l"C:\ti\tirtos_tivac_2_16_01_14\products\bios_6_45_02_31\packages\ti\catalog\arm\cortexm4\tiva\ce\lib\Boot.aem4f"
 -l"C:\ti\tirtos_tivac_2_16_01_14\products\bios_6_45_02_31\packages\ti\targets\arm\rtsarm\lib\ti.targets.arm.rtsarm.aem4f"
 -l"C:\ti\tirtos_tivac_2_16_01_14\products\bios_6_45_02_31\packages\ti\targets\arm\rtsarm\lib\boot.aem4f"
