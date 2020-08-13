@@ -114,11 +114,10 @@ int main(void)
 	System_printf("Board_initGPIO()\n");
 	System_flush();
 
-/*
 	Board_initEMAC();
 	System_printf("Board_initEMAC()\n");
 	System_flush();
-*/
+
 
 	System_printf("Calling Semaphore_create()\n");
 	System_flush();
