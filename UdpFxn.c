@@ -60,11 +60,11 @@
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
 
-const char *RPI_IP = "192.168.0.136";
 const char *PORT_STR = "31717";
 uint32_t PORT = 31717;
 const char *SERVIP_STR = "192.168.0.136";
 uint32_t MAXBUF = 1024;
+
 
 /******************************************************************************
 * Function Bodies
@@ -83,30 +83,21 @@ void UdpFxn(void)
 
 	int err = NULL;
 	int sockfd;
-//	struct sockaddr_in servAddr;
-//	socklen_t addrlen;
+	struct sockaddr_in servAddr;
+	socklen_t addrlen;
 	char *sendBuf = "1";
 
-
-/*	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (sockfd == -1)
-	{
-		err = fdError();
-		System_printf("socket() failed: err=%d\n", err);
-		System_flush();
-	}
-*/
-
+/*
+//>>>------------------------------------------------------------->>>
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
 	int s;
 
-
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
-	hints.ai_socktype = SOCK_DGRAM; /* Datagram socket */
+	hints.ai_family = AF_UNSPEC;    // Allow IPv4 or IPv6
+	hints.ai_socktype = SOCK_DGRAM; // Datagram socket
 	hints.ai_flags = 0;
-	hints.ai_protocol = 0;          /* Any protocol */
+	hints.ai_protocol = 0;          // Any protocol
 
 	s = getaddrinfo(SERVIP_STR, PORT_STR, &hints, &result);
 	err = NULL;
@@ -132,7 +123,6 @@ void UdpFxn(void)
 		{
 			System_printf("Huzzah, a socket!\n");
 			System_flush();
-//			break;
 		}
 
 		err = NULL;
@@ -145,30 +135,50 @@ void UdpFxn(void)
 		}
 		break;
 	}
+//<<<-------------------------------------------------------------<<<
+*/
+
+
+//>>>------------------------------------------------------------->>>
+	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (sockfd == -1)
+	{
+		err = fdError();
+		System_printf("socket() failed: err=%d\n", err);
+		System_flush();
+	}
+
+	memset(&servAddr, 0, sizeof(servAddr));
+	addrlen = sizeof(struct sockaddr_in);
+	servAddr.sin_family = AF_INET;
+	servAddr.sin_port = PORT;
+
+	convertServIP(servAddr, SERVIP_STR);
 
 /*	memset(&servAddr, 0, sizeof(servAddr));
 	addrlen = sizeof(struct sockaddr_in);
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_port = PORT;
-	servAddr.sin_addr.s_addr = inet_pton(AF_INET, SERVIP_STR, buf);		//192.168.0.136 -> c0.a8.00.88 (0xc0a80088)
+	//servAddr.sin_addr.s_addr = inet_pton(AF_INET, SERVIP_STR, buf);		//192.168.0.136 -> c0.a8.00.88 (0xc0a80088)
+	//servAddr.sin_addr.s_addr = inet_addr(SERVIP_STR);
 */
 
-/*	err = NULL;
-	//if (connect (sockfd, (struct sockaddr*) &servAddr, sizeof(servAddr)) < 0)
-	if (connect(sockfd,rp->ai_addr, rp->ai_addrlen) < 0)
+	err = NULL;
+	if (connect (sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0)
 	{
 		err = fdError();
 		System_printf("connect() failed: err=%d\n", err);
 		System_flush();
 	}
-*/
-	//if ((sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen) < 0))
-	if (sendto(sockfd, sendBuf, sizeof(sendBuf), 0, rp->ai_addr, rp->ai_addrlen) < 0)
+
+	if ((sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen) < 0))
 	{
 		err = fdError();
 		System_printf("sendto() failed: err=%d\n", err);
 		System_flush();
 	}
+//<<<-------------------------------------------------------------<<<
+
 
 	close(sockfd);
 
