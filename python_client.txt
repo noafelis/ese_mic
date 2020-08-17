@@ -1,0 +1,22 @@
+#! python3
+
+import socket
+
+# https://pythontic.com/modules/socket/udp-client-server-example
+
+msgFromClient       = "Hello dis is doomkitten reporting from elder numberwitch"
+bytesToSend         = str.encode(msgFromClient)
+serverAddressPort   = ("192.168.0.136", 31717)
+bufferSize          = 1024
+
+# Create a UDP socket at client side
+UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+
+# Send to server using created UDP socket
+UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+
+msgFromServer = UDPClientSocket.recvfrom(bufferSize)
+
+msg = "Message from Server {}".format(msgFromServer[0])
+
+print(msg)

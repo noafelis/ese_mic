@@ -6,8 +6,7 @@
  * connect() failed: err=6
  * 6	ENXIO	All	The device or driver was not found.	Check status of the device attempting to access.
  *
- * sendto() failed: err=22
- * 22	EINVAL	All types	An incorrect argument was specified.	Check the validity of function parameters.
+ * jetzt neu!! sendto() failed: err=6 (no longer 22 EINVAL)
  *
  *
 *******************************************************************************/
