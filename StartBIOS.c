@@ -56,6 +56,11 @@
 
 #define SW2 GPIO_PIN_1
 
+
+Semaphore_Handle semHandle;
+Semaphore_Struct sem0Struct;
+
+
 /******************************************************************************
  * Function Bodies
  *******************************************************************************/
@@ -72,8 +77,12 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 	Error_Block eb;
 	int err;
 
-	/* Create a HTTP task when the IP address is added */
+	Semaphore_Params semParams;
+	Semaphore_Params_init(&semParams);
+	Semaphore_construct(&sem0Struct, 1, &semParams);
+	semHandle = Semaphore_handle(&sem0Struct);
 
+	/* Create a HTTP task when the IP address is added */
 	if (fAdd && !taskHandle)
 	{
 		Error_init(&eb);
@@ -93,6 +102,7 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 			System_printf("netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n", err);
 			System_flush();
 		}
+		Semaphore_post(semHandle);
 	}
 
 }
@@ -111,18 +121,17 @@ int main(void)
 	System_printf("Board_initGPIO()\n");
 	System_flush();
 
-
-	Board_initEMAC();
+	Board_initEMAC();		// is needed for receiving IP address (apparently)
 	System_printf("Board_initEMAC()\n");
 	System_flush();
 
 
-	System_printf("createSockThread(5)\n");
+	System_printf("createSockThread()\n");
 	System_flush();
-	createSockThread(5);
+	createSockThread(5);	//doesn't work when prio > 5; connect() returns -1
 
 //	void *taskHandle = NULL;
-//	taskHandle = TaskCreate(sendADCValuesToPi, "sendADCValuesToPi", 5, 1024);
+//	taskHandle = TaskCreate(UdpFxn, "UdpFxn", 5, 1024);
 //	setup_Pi_Task();
 
 	/* Start BIOS */

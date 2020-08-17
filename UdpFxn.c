@@ -61,6 +61,10 @@ uint32_t PORT = 31717;
 const char *SERVIP_STR = "192.168.0.136";
 uint32_t MAXBUF = 1024;
 
+#include <ti/sysbios/knl/Semaphore.h>
+Semaphore_Handle semHandle;
+Semaphore_Struct sem0Struct;
+
 
 /******************************************************************************
 * Function Bodies
@@ -76,6 +80,8 @@ uint32_t MAXBUF = 1024;
 void UdpFxn(void)
 {
 	fdOpenSession((void *)Task_self());
+
+//	Semaphore_pend(semHandle, BIOS_WAIT_FOREVER);
 
 	int err = NULL;
 	//int sockfd;
@@ -164,29 +170,40 @@ void UdpFxn(void)
 
 	while (connect(sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0)
 	{
-		if (connect(sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0)
-		{
-			err = fdError();
-			System_printf("connect() failed: err=%d\n", err);	//see serrno.h for error macro defs. 6 -> ENXIO - Device not configured
-			System_flush();
-		}
+		err = fdError();
+		System_printf("connect() failed: err=%d\n", err);	//see serrno.h for error macro defs. 6 -> ENXIO - Device not configured
+		System_flush();
 
 		Task_sleep(1000);
 	}
 
 
-	if ((sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen) < 0))
+	while (1)
+	{
+	while ((sendto((int)sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen)) < 0)
 	{
 		err = fdError();
 		System_printf("sendto() failed: err=%d\n", err);
 		System_flush();
+
+		Task_sleep(1000);
 	}
+		Task_sleep(1000);
+	}
+
 //<<<-------------------------------------------------------------<<<
 
+	while(1)
+	{
+		System_printf("stuck now in loop after sendto() should've been succesful\n");
+		System_flush();
+
+		Task_sleep(1000);
+	}
 
 	//close(sockfd);
 
-	fdCloseSession((void *)Task_self());
+//	fdCloseSession((void *)Task_self());
 }
 
 
