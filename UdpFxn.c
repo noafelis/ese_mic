@@ -17,11 +17,14 @@
 *******************************************************************************/
 #include "Board.h"
 
+#include <ti/ndk/inc/netmain.h>
+#include <ti/ndk/inc/serrno.h>
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
+//#include <sys/socket.h>
 //#include <netinet/in.h>
 //#include <arpa/inet.h>
 
@@ -32,18 +35,11 @@
 
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
-#include <ti/net/http/httpcli.h>
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-//#include <ti/sysbios/knl/Event.h>
-//#include <ti/sysbios/knl/Semaphore.h>
-//#include <ti/sysbios/hal/Hwi.h>
-
-//#include <ti/ndk/inc/netmain.h>
-//#include <ti/ndk/inc/_nettool.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -55,6 +51,7 @@
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
+
 
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
@@ -81,9 +78,11 @@ void UdpFxn(void)
 	fdOpenSession((void *)Task_self());
 
 	int err = NULL;
-	int sockfd;
+	//int sockfd;
+	SOCKET sockfd;
 	struct sockaddr_in servAddr;
-	socklen_t addrlen;
+	//socklen_t addrlen;
+	int addrlen;
 	char *sendBuf = "1";
 
 /*
@@ -140,7 +139,7 @@ void UdpFxn(void)
 
 //>>>------------------------------------------------------------->>>
 	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (sockfd == -1)
+	if ((int)sockfd == -1)
 	{
 		err = fdError();
 		System_printf("socket() failed: err=%d\n", err);
@@ -151,8 +150,7 @@ void UdpFxn(void)
 	addrlen = sizeof(struct sockaddr_in);
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_port = PORT;
-
-	convertServIP(servAddr, SERVIP_STR);
+	servAddr.sin_addr.s_addr = inet_addr("192.168.0.136");
 
 /*	memset(&servAddr, 0, sizeof(servAddr));
 	addrlen = sizeof(struct sockaddr_in);
@@ -163,12 +161,19 @@ void UdpFxn(void)
 */
 
 	err = NULL;
-	if (connect (sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0)
+
+	while (connect(sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0)
 	{
-		err = fdError();
-		System_printf("connect() failed: err=%d\n", err);
-		System_flush();
+		if (connect(sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0)
+		{
+			err = fdError();
+			System_printf("connect() failed: err=%d\n", err);	//see serrno.h for error macro defs. 6 -> ENXIO - Device not configured
+			System_flush();
+		}
+
+		Task_sleep(1000);
 	}
+
 
 	if ((sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen) < 0))
 	{
@@ -179,7 +184,7 @@ void UdpFxn(void)
 //<<<-------------------------------------------------------------<<<
 
 
-	close(sockfd);
+	//close(sockfd);
 
 	fdCloseSession((void *)Task_self());
 }

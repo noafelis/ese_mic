@@ -14,6 +14,4 @@ void UdpFxn(void);
 //int setup_Pi_Task(void);
 void createSockThread(int prio);
 
-void convertServIP(struct sockaddr_in servAddr, const char *SERVIP_STR);
-
 #endif /* UDPFXN_H_ */

@@ -65,7 +65,7 @@
  *  This function is called when IP Addr is added/deleted
  */
 
-void netIPAddrHook(void)
+void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 {
 	Task_Handle taskHandle;
 	Task_Params taskParams;
@@ -73,23 +73,28 @@ void netIPAddrHook(void)
 	int err;
 
 	/* Create a HTTP task when the IP address is added */
-	Error_init(&eb);
 
-	/*
-	 *  Create the Task that handles UDP "connections."
-	 *  arg0 will be the port that this task listens to.
-	 */
-	Task_Params_init(&taskParams);
-	taskParams.stackSize = UDPTASKSTACKSIZE;
-	taskParams.priority = 1;
-	taskParams.arg0 = UDPPORT;
-	taskHandle = Task_create((Task_FuncPtr)UdpFxn, &taskParams, &eb);
-	if (taskHandle == NULL)
+	if (fAdd && !taskHandle)
 	{
-		err = fdError();
-		System_printf("netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n", err);
-		System_flush();
+		Error_init(&eb);
+
+		/*
+		 *  Create the Task that handles UDP "connections."
+		 *  arg0 will be the port that this task listens to.
+		 */
+		Task_Params_init(&taskParams);
+		taskParams.stackSize = UDPTASKSTACKSIZE;
+		taskParams.priority = 1;
+		taskParams.arg0 = UDPPORT;
+		taskHandle = Task_create((Task_FuncPtr)UdpFxn, &taskParams, &eb);
+		if (taskHandle == NULL)
+		{
+			err = fdError();
+			System_printf("netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n", err);
+			System_flush();
+		}
 	}
+
 }
 
 /*
@@ -106,17 +111,15 @@ int main(void)
 	System_printf("Board_initGPIO()\n");
 	System_flush();
 
-/*
+
 	Board_initEMAC();
 	System_printf("Board_initEMAC()\n");
 	System_flush();
-*/
+
 
 	System_printf("createSockThread(5)\n");
 	System_flush();
 	createSockThread(5);
-//	netIPAddrHook();
-
 
 //	void *taskHandle = NULL;
 //	taskHandle = TaskCreate(sendADCValuesToPi, "sendADCValuesToPi", 5, 1024);
