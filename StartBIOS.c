@@ -58,10 +58,8 @@
 
 #define SW2 GPIO_PIN_1
 
-
 Semaphore_Handle semHandle;
 Semaphore_Struct sem0Struct;
-
 
 /******************************************************************************
  * Function Bodies
@@ -74,18 +72,14 @@ Semaphore_Struct sem0Struct;
 
 void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 {
+
+	System_printf("Inside netIPAddrHook()\n");
+	System_flush();
+
 	Task_Handle taskHandle;
 	Task_Params taskParams;
 	Error_Block eb;
 	int err;
-
-	Semaphore_Params semParams;
-	Semaphore_Params_init(&semParams);
-	Semaphore_construct(&sem0Struct, 1, &semParams);
-	semHandle = Semaphore_handle(&sem0Struct);
-
-	semHandle = SemCreate(0);
-
 
 	/* Create a HTTP task when the IP address is added */
 	if (fAdd && !taskHandle)
@@ -100,16 +94,30 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 		taskParams.stackSize = UDPTASKSTACKSIZE;
 		taskParams.priority = 1;
 		taskParams.arg0 = UDPPORT;
-		taskHandle = Task_create((Task_FuncPtr)UdpFxn, &taskParams, &eb);
+		taskHandle = Task_create((Task_FuncPtr) UdpFxn, &taskParams, &eb);
 		if (taskHandle == NULL)
 		{
 			err = fdError();
-			System_printf("netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n", err);
+			System_printf(
+					"netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
+					err);
 			System_flush();
 		}
-		SemPost(semHandle);
 	}
 
+	void *udpTaskHandle = NULL;
+
+	System_printf("netIPAddrHook() --> calling TaskCreate()\n");
+	System_flush();
+
+	udpTaskHandle = TaskCreate(UdpFxn, "UdpFxn\0", OS_TASKPRINORM,
+								OS_TASKSTKNORM, 0, 0, 0);
+	if (udpTaskHandle == NULL)
+	{
+		err = fdError();
+		System_printf("netIPAddrHook: TaskCreate() failed, error: %d\n", err);
+		System_flush();
+	}
 }
 
 /*
@@ -130,14 +138,14 @@ int main(void)
 	System_printf("Board_initEMAC()\n");
 	System_flush();
 
-
-	System_printf("createSockThread()\n");
-	System_flush();
-	createSockThread(5);	//doesn't work when prio > 5; connect() returns -1
-
-//	void *taskHandle = NULL;
-//	taskHandle = TaskCreate(UdpFxn, "UdpFxn", 5, 1024);
-//	setup_Pi_Task();
+	/*
+	 Semaphore_Params semParams;
+	 Semaphore_Params_init(&semParams);
+	 semParams.mode = Semaphore_Mode_BINARY;
+	 Semaphore_construct(&sem0Struct, 1, &semParams);
+	 semHandle = Semaphore_handle(&sem0Struct);
+	 semHandle = SemCreate(0);
+	 */
 
 	/* Start BIOS */
 	BIOS_start();

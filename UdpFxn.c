@@ -9,12 +9,11 @@
  * jetzt neu!! sendto() failed: err=6 (no longer 22 EINVAL)
  *
  *
-*******************************************************************************/
+ *******************************************************************************/
 //--------------------------------------------------------------------------------------------------------
-
 /******************************************************************************
-* Includes
-*******************************************************************************/
+ * Includes
+ *******************************************************************************/
 #include "Board.h"
 
 #include <ti/ndk/inc/netmain.h>
@@ -44,7 +43,6 @@
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
 
-
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
 #include "inc/hw_types.h"
@@ -55,7 +53,6 @@
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
-
 
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
@@ -69,34 +66,38 @@ uint32_t MAXBUF = 1024;
 Semaphore_Handle semHandle;
 Semaphore_Struct sem0Struct;
 
-
 /******************************************************************************
-* Function Bodies
-*******************************************************************************/
+ * Function Bodies
+ *******************************************************************************/
 
 //TODO follow this!!! http://software-dl.ti.com/simplelink/esd/simplelink_msp432e4_sdk/2.20.00.20/docs/ndk/NDK_Users_Guide.html
-
 
 /*
  *  ======== send adc values to pi server ========
  */
 // https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/555107?NDK-socket-creation-error
-void UdpFxn(void)
+void UdpFxn(UArg arg0, UArg arg1)
 {
-	fdOpenSession((void *)Task_self());
+//	fdOpenSession((void *)Task_self());
 
 // don't know how semaphore work, when this is called UartFxn is preempted.
-/*
-	if ((SemPend(semHandle, SemaphoreP_WAIT_FOREVER)) == 0)
-	{
-		System_printf("SemPend() failed, couldn't obtain semaphore.\n");
-		System_flush();
-	}
-*/
-	int err = NULL;
 
+	System_printf("Inside UdpFxn().\n");
+	System_flush();
+
+	/* semaphore should be posted by ADC task.
+	 *
+	 *
+	 if ((SemPend(semHandle, SemaphoreP_WAIT_FOREVER)) == 0)
+	 {
+	 System_printf("SemPend() failed, couldn't obtain semaphore.\n");
+	 System_flush();
+	 }
+	 */
 
 //>>>------------------------------------------------------------->>>
+	int err = NULL;
+
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
 	SOCKET sockfd;
@@ -137,17 +138,15 @@ void UdpFxn(void)
 	}
 //<<<-------------------------------------------------------------<<<
 
-
-
 //>>>------------------------------------------------------------->>>
-/*	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if ((int)sockfd == -1)
-	{
-		err = fdError();
-		System_printf("socket() failed: err=%d\n", err);
-		System_flush();
-	}
-*/
+	/*	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	 if ((int)sockfd == -1)
+	 {
+	 err = fdError();
+	 System_printf("socket() failed: err=%d\n", err);
+	 System_flush();
+	 }
+	 */
 
 	struct sockaddr_in servAddr;
 	struct in_addr wtf;
@@ -163,14 +162,14 @@ void UdpFxn(void)
 	System_printf("servAddr.sin_addr.s_addr = %d\n", wtf.s_addr);
 	System_flush();
 
-
 	char *sendBuf = "1";
 	int data;
 	err = NULL;
 
 	while (1)
 	{
-		if ((data = sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen)) < 0)
+		if ((data = sendto(sockfd, sendBuf, sizeof(sendBuf), 0,
+							(struct sockaddr*) &servAddr, addrlen)) < 0)
 		{
 			err = fdError();
 			System_printf("sendto() failed: err=%d\n", err);
@@ -180,7 +179,9 @@ void UdpFxn(void)
 		}
 		else
 		{
-			System_printf("at least sendto() didn't produce an error, maybe? data=%d\n", data);
+			System_printf(
+					"at least sendto() didn't produce an error, maybe? data=%d\n",
+					data);
 			System_flush();
 			Task_sleep(1000);
 		}
@@ -191,26 +192,5 @@ void UdpFxn(void)
 	//close(sockfd);
 
 //	fdCloseSession((void *)Task_self());
-}
-
-
-void createSockThread(int prio)
-{
-	//int status;
-    Task_Params params;
-    Task_Handle mySockThread;
-
-    Task_Params_init(&params);
-    params.instance->name = "mySockThread";
-    params.priority = prio;
-    params.stackSize = 2048;
-
-	mySockThread = Task_create((Task_FuncPtr)UdpFxn, &params, NULL);
-
-	if (!mySockThread)
-	{
-		System_printf("Tasc_create() failed!\n");
-		System_flush();
-	}
 }
 
