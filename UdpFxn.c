@@ -21,6 +21,8 @@
 #include <ti/ndk/inc/serrno.h>
 
 #include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,11 +37,13 @@
 
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
+#include <ti/drivers/ports/SemaphoreP.h>
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
+
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -81,8 +85,14 @@ void UdpFxn(void)
 {
 	fdOpenSession((void *)Task_self());
 
-//	Semaphore_pend(semHandle, BIOS_WAIT_FOREVER);
-
+// don't know how semaphore work, when this is called UartFxn is preempted.
+/*
+	if ((SemPend(semHandle, SemaphoreP_WAIT_FOREVER)) == 0)
+	{
+		System_printf("SemPend() failed, couldn't obtain semaphore.\n");
+		System_flush();
+	}
+*/
 	int err = NULL;
 	//int sockfd;
 	SOCKET sockfd;
@@ -168,6 +178,7 @@ void UdpFxn(void)
 
 	err = NULL;
 
+/*
 	while (connect(sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0)
 	{
 		err = fdError();
@@ -176,30 +187,28 @@ void UdpFxn(void)
 
 		Task_sleep(1000);
 	}
+*/
 
-
+	int data;
 	while (1)
 	{
-	while ((sendto((int)sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen)) < 0)
-	{
-		err = fdError();
-		System_printf("sendto() failed: err=%d\n", err);
-		System_flush();
+		if ((data = sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen)) < 0)
+		{
+			err = fdError();
+			System_printf("sendto() failed: err=%d %s\n", err);
+			System_flush();
 
-		Task_sleep(1000);
-	}
-		Task_sleep(1000);
+			Task_sleep(1000);
+		}
+		else
+		{
+			System_printf("at least sendto() didn't produce an error, maybe? data=%d\n", data);
+			System_flush();
+			Task_sleep(1000);
+		}
 	}
 
 //<<<-------------------------------------------------------------<<<
-
-	while(1)
-	{
-		System_printf("stuck now in loop after sendto() should've been succesful\n");
-		System_flush();
-
-		Task_sleep(1000);
-	}
 
 	//close(sockfd);
 

@@ -7,13 +7,15 @@
  *******************************************************************************/
 #include "Board.h"
 
+#include <ti/ndk/inc/netmain.h>
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
+//#include <arpa/inet.h>
 
 /* XDCtools Header files */
 #include <xdc/std.h>
@@ -22,7 +24,7 @@
 
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
-#include <ti/net/http/httpcli.h>
+//#include <ti/net/http/httpcli.h>
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
@@ -30,7 +32,7 @@
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
 #include <ti/sysbios/knl/Semaphore.h>
-#include <ti/sysbios/hal/Hwi.h>
+//#include <ti/sysbios/hal/Hwi.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -82,6 +84,9 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 	Semaphore_construct(&sem0Struct, 1, &semParams);
 	semHandle = Semaphore_handle(&sem0Struct);
 
+	semHandle = SemCreate(0);
+
+
 	/* Create a HTTP task when the IP address is added */
 	if (fAdd && !taskHandle)
 	{
@@ -102,7 +107,7 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 			System_printf("netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n", err);
 			System_flush();
 		}
-		Semaphore_post(semHandle);
+		SemPost(semHandle);
 	}
 
 }
