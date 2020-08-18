@@ -139,14 +139,6 @@ void UdpFxn(UArg arg0, UArg arg1)
 //<<<-------------------------------------------------------------<<<
 
 //>>>------------------------------------------------------------->>>
-	/*	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	 if ((int)sockfd == -1)
-	 {
-	 err = fdError();
-	 System_printf("socket() failed: err=%d\n", err);
-	 System_flush();
-	 }
-	 */
 
 	struct sockaddr_in servAddr;
 	struct in_addr wtf;
@@ -163,10 +155,12 @@ void UdpFxn(UArg arg0, UArg arg1)
 	System_flush();
 
 	char *sendBuf = "1";
-	int data;
+	int data = NULL;
 	err = NULL;
 
-	while (1)
+	int sendctdn = 5;
+
+	while (sendctdn > -1)
 	{
 		if ((data = sendto(sockfd, sendBuf, sizeof(sendBuf), 0,
 							(struct sockaddr*) &servAddr, addrlen)) < 0)
@@ -175,17 +169,61 @@ void UdpFxn(UArg arg0, UArg arg1)
 			System_printf("sendto() failed: err=%d\n", err);
 			System_flush();
 
+			sendctdn--;
 			Task_sleep(1000);
 		}
 		else
 		{
 			System_printf(
-					"at least sendto() didn't produce an error, maybe? data=%d\n",
-					data);
+					"#%d: at least sendto() didn't produce an error, maybe? data=%d\n",
+					sendctdn, data);
 			System_flush();
+
 			Task_sleep(1000);
+
+			sendctdn--;
 		}
 	}
+
+	char *pBuf;
+	HANDLE hBuffer;
+	err = NULL;
+	int retval;
+	int recctdn = 5;
+
+	while (recctdn > -1)
+	{
+		/*
+		 * "if no msg are available at the socket,
+		 * this call waits for a msg to arrive,
+		 * unless the socket is non-blocking"
+		 *
+		 * so yea, obv it's gonna get stuck here. =_=
+		 */
+		retval = (int)recvnc(sockfd, (void **)&pBuf, MSG_DONTWAIT, &hBuffer);
+		if (retval < 0)
+		{
+			err = fdError();
+			System_printf("recvnc(): err=%d\n35 EWOULDBLOCK", err);
+			System_flush();
+
+			recctdn--;
+			Task_sleep(1000);
+		}
+		else
+		{
+			System_printf("#%d: at least recvnc() didn't produce an error, maybe? data=%d\n", sendctdn, retval);
+			System_flush();
+
+			Task_sleep(1000);
+
+			recctdn--;
+		}
+	}
+
+	recvncfree(hBuffer);
+
+
 
 //<<<-------------------------------------------------------------<<<
 
