@@ -94,17 +94,12 @@ void UdpFxn(void)
 	}
 */
 	int err = NULL;
-	//int sockfd;
-	SOCKET sockfd;
-	struct sockaddr_in servAddr;
-	//socklen_t addrlen;
-	int addrlen;
-	char *sendBuf = "1";
 
 
 //>>>------------------------------------------------------------->>>
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
+	SOCKET sockfd;
 	int s;
 
 	memset(&hints, 0, sizeof(struct addrinfo));
@@ -154,22 +149,24 @@ void UdpFxn(void)
 	}
 */
 
+	struct sockaddr_in servAddr;
+	struct in_addr wtf;
+	int addrlen;
+
 	memset(&servAddr, 0, sizeof(servAddr));
 	addrlen = sizeof(struct sockaddr_in);
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_port = PORT;
-	servAddr.sin_addr.s_addr = inet_addr("192.168.0.136");
+	inet_aton("192.168.0.136", &wtf);
+	servAddr.sin_addr.s_addr = wtf.s_addr;
 
-/*	memset(&servAddr, 0, sizeof(servAddr));
-	addrlen = sizeof(struct sockaddr_in);
-	servAddr.sin_family = AF_INET;
-	servAddr.sin_port = PORT;
-	//servAddr.sin_addr.s_addr = inet_pton(AF_INET, SERVIP_STR, buf);		//192.168.0.136 -> c0.a8.00.88 (0xc0a80088)
-	//servAddr.sin_addr.s_addr = inet_addr(SERVIP_STR);
-*/
+	System_printf("servAddr.sin_addr.s_addr = %d\n", wtf.s_addr);
+	System_flush();
 
-	err = NULL;
+
+	char *sendBuf = "1";
 	int data;
+	err = NULL;
 
 	while (1)
 	{

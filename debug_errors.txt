@@ -1,6 +1,0 @@
-program runs until 
-recvfrom(sockfd, sendBuf, MAXBUF, 0, (struct sockaddr*)&piServAddr, &addrlen);
-(line 151 in SendToPi_UDP.c)
-
-ti.sysbios.knl.Task: line 383: E_spOutOfBounds: Task 0x20000c20 stack error, SP = 0x200013f4.
-xdc.runtime.Error.raise: terminating execution
