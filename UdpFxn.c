@@ -101,15 +101,15 @@ void UdpFxn(void)
 	int addrlen;
 	char *sendBuf = "1";
 
-/*
+
 //>>>------------------------------------------------------------->>>
 	struct addrinfo hints;
 	struct addrinfo *result, *rp;
 	int s;
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_UNSPEC;    // Allow IPv4 or IPv6
-	hints.ai_socktype = SOCK_DGRAM; // Datagram socket
+	hints.ai_family = AF_INET;    // IPv4; AF_UNSPEC -> IPv4 or IPv6
+	hints.ai_socktype = SOCK_DGRAM; // Datagram socket = UDP
 	hints.ai_flags = 0;
 	hints.ai_protocol = 0;          // Any protocol
 
@@ -138,29 +138,21 @@ void UdpFxn(void)
 			System_printf("Huzzah, a socket!\n");
 			System_flush();
 		}
-
-		err = NULL;
-		if (connect(sockfd,rp->ai_addr, rp->ai_addrlen) < 0)
-		{
-			err = fdError();
-			System_printf("connect() failed: err=%d\n", err);
-			System_flush();
-			continue;
-		}
 		break;
 	}
 //<<<-------------------------------------------------------------<<<
-*/
+
 
 
 //>>>------------------------------------------------------------->>>
-	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+/*	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if ((int)sockfd == -1)
 	{
 		err = fdError();
 		System_printf("socket() failed: err=%d\n", err);
 		System_flush();
 	}
+*/
 
 	memset(&servAddr, 0, sizeof(servAddr));
 	addrlen = sizeof(struct sockaddr_in);
@@ -177,25 +169,14 @@ void UdpFxn(void)
 */
 
 	err = NULL;
-
-/*
-	while (connect(sockfd, (struct sockaddr*)&servAddr, sizeof(servAddr)) < 0)
-	{
-		err = fdError();
-		System_printf("connect() failed: err=%d\n", err);	//see serrno.h for error macro defs. 6 -> ENXIO - Device not configured
-		System_flush();
-
-		Task_sleep(1000);
-	}
-*/
-
 	int data;
+
 	while (1)
 	{
 		if ((data = sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, addrlen)) < 0)
 		{
 			err = fdError();
-			System_printf("sendto() failed: err=%d %s\n", err);
+			System_printf("sendto() failed: err=%d\n", err);
 			System_flush();
 
 			Task_sleep(1000);
