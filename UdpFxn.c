@@ -1,16 +1,3 @@
-//--------------------------------------------------------------------------------------------------------
-/******************************************************************************
- * https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.4.0/com.ibm.zos.v2r4.hala001/syserret.htm
- *
- *
- * connect() failed: err=6
- * 6	ENXIO	All	The device or driver was not found.	Check status of the device attempting to access.
- *
- * jetzt neu!! sendto() failed: err=6 (no longer 22 EINVAL)
- *
- *
- *******************************************************************************/
-//--------------------------------------------------------------------------------------------------------
 /******************************************************************************
  * Includes
  *******************************************************************************/
@@ -25,9 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
-//#include <arpa/inet.h>
 
 /* XDCtools Header files */
 #include <xdc/std.h>
@@ -42,6 +26,7 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
+#include <ti/sysbios/knl/Semaphore.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -54,28 +39,25 @@
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
 
-#define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
+#define USER_AGENT "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
+#define BIND
+#define REC_SERVREPLY
 
 const char *PORT_STR = "31717";
-uint32_t PORT = 31717;
 const char *SERVIP_STR = "192.168.0.136";
+uint32_t PORT = 31717;
 uint32_t MAXBUF = 1024;
 
-#include <ti/sysbios/knl/Semaphore.h>
 Semaphore_Handle semHandle;
 Semaphore_Struct sem0Struct;
 
 /******************************************************************************
  * Function Bodies
  *******************************************************************************/
-
-//TODO follow this!!! http://software-dl.ti.com/simplelink/esd/simplelink_msp432e4_sdk/2.20.00.20/docs/ndk/NDK_Users_Guide.html
-
 /*
  *  ======== send adc values to pi server ========
  */
-// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/555107?NDK-socket-creation-error
 void UdpFxn(UArg arg0, UArg arg1)
 {
 //	fdOpenSession((void *)Task_self());
@@ -136,122 +118,102 @@ void UdpFxn(UArg arg0, UArg arg1)
 	}
 //<<<-------------------------------------------------------------<<<
 
-
 //>>>------------------------------------------------------------->>>
+#ifdef BIND
 	// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/354644?NDK-UDP-Client-Issue
 	// bind our socket to a particular port. Must bind else server reply drops!
 	struct sockaddr_in bindAddr;
 	memset(&bindAddr, 0, sizeof(bindAddr));
 	bindAddr.sin_family = AF_INET;
 	bindAddr.sin_addr.s_addr = INADDR_ANY;
-	bindAddr.sin_port = htons(1025);		//? why?
+	bindAddr.sin_port = htons(1025);		// I guess just a random port?
 
 	err = NULL;
-	if (bind(sockfd, (struct sockaddr *)&bindAddr, sizeof(bindAddr)) < 0)
+	if (bind(sockfd, (struct sockaddr*) &bindAddr, sizeof(bindAddr)) < 0)
 	{
 		err = fdError();
 		System_printf("bind() failed, err = %d\n", err);
 		System_flush();
 	}
+#endif
 //<<<-------------------------------------------------------------<<<
-
 
 //>>>------------------------------------------------------------->>>
 	struct sockaddr_in servAddr;
-//	struct in_addr wtf;
-//	int addrlen;
 
 	memset(&servAddr, 0, sizeof(servAddr));
-//	addrlen = sizeof(struct sockaddr_in);
 	servAddr.sin_family = AF_UNSPEC;
 	servAddr.sin_port = htons(PORT);
 	inet_aton("192.168.0.136", &servAddr.sin_addr);
-//	servAddr.sin_addr.s_addr = wtf.s_addr;
 
 	System_printf("servAddr.sin_addr.s_addr = %d\n", servAddr.sin_addr.s_addr);
 	System_flush();
 
-	char *sendBuf = "dis is tiva";
-	int data = NULL;
+	char *sendBuf = "105";
+	int bytesSent = NULL;
 	err = NULL;
 
-	int sendctdn = 5;
-
-	while (sendctdn > -1)
+	do
 	{
-		data = sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, sizeof(servAddr));
-
-		if (data < 0 || data != sizeof(sendBuf))
+		bytesSent = sendto(sockfd, sendBuf, sizeof(sendBuf), 0,
+							(struct sockaddr*) &servAddr, sizeof(servAddr));
+		if (bytesSent < 0)
 		{
 			err = fdError();
-			System_printf("sendto() of %s failed: err=%d\n", &sendBuf, err);
+			System_printf("sendto() of %s failed: err=%d\n", sendBuf, err);
 			System_flush();
-
-			sendctdn--;
-			Task_sleep(1000);
 		}
-		else
+		else if (bytesSent == sizeof(sendBuf))
 		{
-			System_printf(
-					"#%d: at least sendto() didn't produce an error, maybe? data=%d\n",
-					sendctdn, data);
+			System_printf("sendto() of %s: bytesSent=%d, bufSize=%d\n", sendBuf,
+							bytesSent, sizeof(sendBuf));
 			System_flush();
-
-			Task_sleep(1000);
-
-			sendctdn--;
 		}
-	}
+	} while (bytesSent < 0);
 //<<<-------------------------------------------------------------<<<
 
 
 //>>>------------------------------------------------------------->>>
 
-#ifdef rec
+#ifdef REC_SERVREPLY
 
 	char *pBuf;
 	HANDLE hBuffer;
 	err = NULL;
-	int retval;
+	int retval = NULL;
 	int recctdn = 5;
 
-	while (recctdn > -1)
+	do
 	{
 		/*
-		 * "if no msg are available at the socket,
-		 * this call waits for a msg to arrive,
+		 * "if no msg are available at the socket, this call waits for a msg to arrive,
 		 * unless the socket is non-blocking"
-		 *
-		 * so yea, obv it's gonna get stuck here. =_=
 		 */
 		retval = (int)recvnc(sockfd, (void **)&pBuf, MSG_DONTWAIT, &hBuffer);
 		if (retval < 0)
 		{
 			err = fdError();
-			System_printf("#%d recvnc(): err=%d [35 EWOULDBLOCK]\n", sendctdn, err);
+			System_printf("#%d recvnc(): err=%d [35 EWOULDBLOCK]\n", recctdn, err);
 			System_flush();
-
 			recctdn--;
-			Task_sleep(1000);
 		}
 		else
 		{
-			System_printf("#%d: at least recvnc() didn't produce an error, maybe? data=%d\n", sendctdn, retval);
+			System_printf("#%d: recvnc() received %d bytes\n", recctdn, retval);
 			System_flush();
-
-			Task_sleep(1000);
-
 			recctdn--;
 		}
-	}
+		Task_sleep(1000);
+	} while (retval < 0);
 
 	//	recvncfree(hBuffer);
 
 #endif
 //<<<-------------------------------------------------------------<<<
 
+	System_printf("Calling fdClose() and fdCloseSession()\n");
+	System_flush();
 	fdClose(sockfd);
-
-	fdCloseSession((void *)Task_self());
+	fdCloseSession((void*) Task_self());
 }
 
