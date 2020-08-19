@@ -80,8 +80,6 @@ void UdpFxn(UArg arg0, UArg arg1)
 {
 //	fdOpenSession((void *)Task_self());
 
-// don't know how semaphore work, when this is called UartFxn is preempted.
-
 	System_printf("Inside UdpFxn().\n");
 	System_flush();
 
@@ -104,7 +102,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 	int s;
 
 	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = AF_INET;    // IPv4; AF_UNSPEC -> IPv4 or IPv6
+	hints.ai_family = AF_UNSPEC;    // IPv4; AF_UNSPEC -> IPv4 or IPv6
 	hints.ai_socktype = SOCK_DGRAM; // Datagram socket = UDP
 	hints.ai_flags = 0;
 	hints.ai_protocol = 0;          // Any protocol
@@ -146,7 +144,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 
 	memset(&servAddr, 0, sizeof(servAddr));
 	addrlen = sizeof(struct sockaddr_in);
-	servAddr.sin_family = AF_INET;
+	servAddr.sin_family = AF_UNSPEC;
 	servAddr.sin_port = PORT;
 	inet_aton("192.168.0.136", &wtf);
 	servAddr.sin_addr.s_addr = wtf.s_addr;
@@ -154,7 +152,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 	System_printf("servAddr.sin_addr.s_addr = %d\n", wtf.s_addr);
 	System_flush();
 
-	char *sendBuf = "1";
+	char *sendBuf = "dis is tiva";
 	int data = NULL;
 	err = NULL;
 
@@ -184,6 +182,11 @@ void UdpFxn(UArg arg0, UArg arg1)
 			sendctdn--;
 		}
 	}
+//<<<-------------------------------------------------------------<<<
+
+//>>>------------------------------------------------------------->>>
+
+#ifdef rec
 
 	char *pBuf;
 	HANDLE hBuffer;
@@ -204,7 +207,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 		if (retval < 0)
 		{
 			err = fdError();
-			System_printf("recvnc(): err=%d\n35 EWOULDBLOCK", err);
+			System_printf("#%d recvnc(): err=%d [35 EWOULDBLOCK]\n", sendctdn, err);
 			System_flush();
 
 			recctdn--;
@@ -221,14 +224,14 @@ void UdpFxn(UArg arg0, UArg arg1)
 		}
 	}
 
-	recvncfree(hBuffer);
+	//	recvncfree(hBuffer);
 
-
+#endif
 
 //<<<-------------------------------------------------------------<<<
 
-	//close(sockfd);
+	fdClose(sockfd);
 
-//	fdCloseSession((void *)Task_self());
+	fdCloseSession((void *)Task_self());
 }
 
