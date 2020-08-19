@@ -136,20 +136,39 @@ void UdpFxn(UArg arg0, UArg arg1)
 	}
 //<<<-------------------------------------------------------------<<<
 
-//>>>------------------------------------------------------------->>>
 
+//>>>------------------------------------------------------------->>>
+	// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/354644?NDK-UDP-Client-Issue
+	// bind our socket to a particular port. Must bind else server reply drops!
+	struct sockaddr_in bindAddr;
+	memset(&bindAddr, 0, sizeof(bindAddr));
+	bindAddr.sin_family = AF_INET;
+	bindAddr.sin_addr.s_addr = INADDR_ANY;
+	bindAddr.sin_port = htons(1025);		//? why?
+
+	err = NULL;
+	if (bind(sockfd, (struct sockaddr *)&bindAddr, sizeof(bindAddr)) < 0)
+	{
+		err = fdError();
+		System_printf("bind() failed, err = %d\n", err);
+		System_flush();
+	}
+//<<<-------------------------------------------------------------<<<
+
+
+//>>>------------------------------------------------------------->>>
 	struct sockaddr_in servAddr;
-	struct in_addr wtf;
-	int addrlen;
+//	struct in_addr wtf;
+//	int addrlen;
 
 	memset(&servAddr, 0, sizeof(servAddr));
-	addrlen = sizeof(struct sockaddr_in);
+//	addrlen = sizeof(struct sockaddr_in);
 	servAddr.sin_family = AF_UNSPEC;
-	servAddr.sin_port = PORT;
-	inet_aton("192.168.0.136", &wtf);
-	servAddr.sin_addr.s_addr = wtf.s_addr;
+	servAddr.sin_port = htons(PORT);
+	inet_aton("192.168.0.136", &servAddr.sin_addr);
+//	servAddr.sin_addr.s_addr = wtf.s_addr;
 
-	System_printf("servAddr.sin_addr.s_addr = %d\n", wtf.s_addr);
+	System_printf("servAddr.sin_addr.s_addr = %d\n", servAddr.sin_addr.s_addr);
 	System_flush();
 
 	char *sendBuf = "dis is tiva";
@@ -160,11 +179,12 @@ void UdpFxn(UArg arg0, UArg arg1)
 
 	while (sendctdn > -1)
 	{
-		if ((data = sendto(sockfd, sendBuf, sizeof(sendBuf), 0,
-							(struct sockaddr*) &servAddr, addrlen)) < 0)
+		data = sendto(sockfd, sendBuf, sizeof(sendBuf), 0, (struct sockaddr*)&servAddr, sizeof(servAddr));
+
+		if (data < 0 || data != sizeof(sendBuf))
 		{
 			err = fdError();
-			System_printf("sendto() failed: err=%d\n", err);
+			System_printf("sendto() of %s failed: err=%d\n", &sendBuf, err);
 			System_flush();
 
 			sendctdn--;
@@ -183,6 +203,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 		}
 	}
 //<<<-------------------------------------------------------------<<<
+
 
 //>>>------------------------------------------------------------->>>
 
@@ -227,7 +248,6 @@ void UdpFxn(UArg arg0, UArg arg1)
 	//	recvncfree(hBuffer);
 
 #endif
-
 //<<<-------------------------------------------------------------<<<
 
 	fdClose(sockfd);
