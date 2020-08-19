@@ -118,6 +118,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 	}
 //<<<-------------------------------------------------------------<<<
 
+
 //>>>------------------------------------------------------------->>>
 #ifdef BIND
 	// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/354644?NDK-UDP-Client-Issue
@@ -137,6 +138,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 	}
 #endif
 //<<<-------------------------------------------------------------<<<
+
 
 //>>>------------------------------------------------------------->>>
 	struct sockaddr_in servAddr;
@@ -173,6 +175,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 //<<<-------------------------------------------------------------<<<
 
 
+
 //>>>------------------------------------------------------------->>>
 
 #ifdef REC_SERVREPLY
@@ -183,13 +186,14 @@ void UdpFxn(UArg arg0, UArg arg1)
 	int retval = NULL;
 	int recctdn = 5;
 
+	struct sockaddr from;
+	memset(&from, 0, sizeof(from));
+	int addrlen_from;
+
 	do
 	{
-		/*
-		 * "if no msg are available at the socket, this call waits for a msg to arrive,
-		 * unless the socket is non-blocking"
-		 */
-		retval = (int)recvnc(sockfd, (void **)&pBuf, MSG_DONTWAIT, &hBuffer);
+		//retval = (int)recvnc(sockfd, (void **)&pBuf, MSG_DONTWAIT, &hBuffer);
+		retval = (int)recvncfrom(sockfd, (void **)&pBuf, MSG_DONTWAIT, &from, &addrlen_from, &hBuffer);
 		if (retval < 0)
 		{
 			err = fdError();
@@ -199,14 +203,19 @@ void UdpFxn(UArg arg0, UArg arg1)
 		}
 		else
 		{
-			System_printf("#%d: recvnc() received %d bytes\n", recctdn, retval);
+//			char piip[1024];
+//			int piip_len = 1024;
+//			inet_ntop(AF_INET, from.sa_data, piip, piip_len);
+
+//			System_printf("#%d: recvnc() received %d bytes from %s\n", recctdn, retval, piip);
+			System_printf("#%d: recvnc() received %d bytes from %d\n", recctdn, retval, from.sa_data);
 			System_flush();
 			recctdn--;
 		}
 		Task_sleep(1000);
 	} while (retval < 0);
 
-	//	recvncfree(hBuffer);
+	recvncfree(hBuffer);
 
 #endif
 //<<<-------------------------------------------------------------<<<
