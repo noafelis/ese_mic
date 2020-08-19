@@ -1,19 +1,14 @@
-/* modeled after
- * https://github.com/bveyseloglu/All-in-One-IoT-Application-for-TI-Tiva-C/blob/master/httpget_EK_TM4C1294XL_TI/httpget.c
- */
-
 /******************************************************************************
  * Includes
  *******************************************************************************/
 #include "Board.h"
 
+#include <ti/ndk/inc/netmain.h>
+
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
 
 /* XDCtools Header files */
 #include <xdc/std.h>
@@ -22,7 +17,6 @@
 
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
-#include <ti/net/http/httpcli.h>
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
@@ -30,8 +24,6 @@
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
 #include <ti/sysbios/knl/Semaphore.h>
-#include <ti/sysbios/hal/Hwi.h>
-//#include <ti/ndk/inc/netmain.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -43,26 +35,19 @@
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
+#include <MicADC.h>
 
-#include "MicADC.h"
-
-/* Bad Global Variables */
-//Event_Handle Pi_Event;
 /******************************************************************************
  * Defines and Bad Global Vars
  *******************************************************************************/
-//#define HOSTNAME          "www.example.com"
-//#define REQUEST_URI       "/"
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define UDPTASKSTACKSIZE 4096
 #define UDPPORT 31717
 
 #define SW2 GPIO_PIN_1
 
-
 Semaphore_Handle semHandle;
 Semaphore_Struct sem0Struct;
-Semaphore_Params semParams;
 
 /******************************************************************************
  * Function Bodies
@@ -73,31 +58,58 @@ Semaphore_Params semParams;
  *  This function is called when IP Addr is added/deleted
  */
 
-void netIPAddrHook(void)
+void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 {
+
+	System_printf("Inside netIPAddrHook()\n");
+	System_flush();
+
 	Task_Handle taskHandle;
 	Task_Params taskParams;
 	Error_Block eb;
 	int err;
 
 	/* Create a HTTP task when the IP address is added */
-	Error_init(&eb);
+	if (fAdd && !taskHandle)
+	{
+		Error_init(&eb);
 
-	/*
-	 *  Create the Task that handles UDP "connections."
-	 *  arg0 will be the port that this task listens to.
-	 */
-	Task_Params_init(&taskParams);
-	taskParams.stackSize = UDPTASKSTACKSIZE;
-	taskParams.priority = 1;
-	taskParams.arg0 = UDPPORT;
-	taskHandle = Task_create((Task_FuncPtr)UdpFxn, &taskParams, &eb);
-	if (taskHandle == NULL)
+		/*
+		 *  Create the Task that handles UDP "connections."
+		 *  arg0 will be the port that this task listens to.
+		 */
+		Task_Params_init(&taskParams);
+		taskParams.stackSize = UDPTASKSTACKSIZE;
+		taskParams.priority = 1;
+		taskParams.arg0 = UDPPORT;
+		taskHandle = Task_create((Task_FuncPtr) UdpFxn, &taskParams, &eb);
+		if (taskHandle == NULL)
+		{
+			err = fdError();
+			System_printf(
+					"netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
+					err);
+			System_flush();
+		}
+	}
+
+	void *udpTaskHandle = NULL;
+
+	System_printf("netIPAddrHook() --> calling TaskCreate()\n");
+	System_flush();
+
+	udpTaskHandle = TaskCreate(UdpFxn, "UdpFxn\0", OS_TASKPRINORM,
+								OS_TASKSTKNORM, 0, 0, 0);
+	if (udpTaskHandle == NULL)
 	{
 		err = fdError();
-		System_printf("netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n", err);
+		System_printf("netIPAddrHook: TaskCreate() failed, error: %d\n", err);
 		System_flush();
 	}
+
+	System_printf("setup_ADC_Task(4)\n");
+	System_flush();
+	setup_ADC_Task(5);
 }
 
 /*
@@ -114,41 +126,24 @@ int main(void)
 	System_printf("Board_initGPIO()\n");
 	System_flush();
 
-	Board_initEMAC();
+	Board_initEMAC();		// is needed for receiving IP address (apparently)
 	System_printf("Board_initEMAC()\n");
 	System_flush();
 
-
-	System_printf("Calling Semaphore_create()\n");
-	System_flush();
-
-	Semaphore_Params_init(&semParams);
-	semParams.mode = Semaphore_Mode_BINARY;
-
-	Error_Block eb;
-	Error_init(&eb);
-	semHandle = Semaphore_create(0, &semParams, &eb);
-	if (semHandle == NULL)
-	{
-		System_printf("Semaphore_create() failed\n");
-		System_flush();
-	}
-
-
-	System_printf("createSockThread(5)\n");
-	System_flush();
-	createSockThread(5);
-//	netIPAddrHook();
-
-
+/*
 	System_printf("setup_ADC_Task(4)\n");
 	System_flush();
-	setup_ADC_Task(4);
+	setup_ADC_Task(5);
+*/
 
-
-//	void *taskHandle = NULL;
-//	taskHandle = TaskCreate(sendADCValuesToPi, "sendADCValuesToPi", 5, 1024);
-//	setup_Pi_Task();
+	System_printf("create semaphore\n");
+	System_flush();
+	Semaphore_Params semParams;
+	Semaphore_Params_init(&semParams);
+	semParams.mode = Semaphore_Mode_BINARY;
+	Semaphore_construct(&sem0Struct, 1, &semParams);
+	semHandle = Semaphore_handle(&sem0Struct);
+	semHandle = SemCreate(0);
 
 	/* Start BIOS */
 	BIOS_start();

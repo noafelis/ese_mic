@@ -1,10 +1,3 @@
-/*
- * MicADC.c
- *
- *  Created on: 22 Jun 2020
- *      Author: noa
- */
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,11 +23,7 @@
 #include <ti/drivers/EMAC.h>
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/I2C.h>
-//#include <ti/drivers/SDSPI.h>
-//#include <ti/drivers/SPI.h>
 #include <ti/drivers/UART.h>
-// #include <ti/drivers/USBMSCHFatFs.h>
-// #include <ti/drivers/Watchdog.h>
 #include <ti/drivers/WiFi.h>
 #include <ti/sysbios/knl/Semaphore.h>
 
@@ -89,6 +78,9 @@ void micADC(void);
 
 void initializeADCnStuff(void)
 {
+	System_printf("Inside initializeADCnStuff()\n");
+	System_flush();
+
 	//Aktivieren der GPIO Ports, an denen das ADC Interface angeschlossen sein soll
 	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
 
@@ -102,16 +94,10 @@ void initializeADCnStuff(void)
 
 	/* Set pin 0 of GPIO port J to digital input */
 	GPIOPinTypeGPIOInput(USRBUTTON, SW1);
-	/* Set pin 1 of GPIO port J to digital input */
-//	GPIOPinTypeGPIOInput(USRBUTTON, SW2);
 
 	/* Enable pull-up for button on pin 0 of port J damit er auf Druck reagiert und strom tut */
 	GPIOPadConfigGet(USRBUTTON, SW1, &ui32Strength, &ui32PinType);
 	GPIOPadConfigSet(USRBUTTON, SW1, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
-
-	/* Enable pull-up for button on pin 1 of port J damit er auf Druck reagiert und strom tut */
-//	GPIOPadConfigGet(USRBUTTON, SW2, &ui32Strength, &ui32PinType);
-//	GPIOPadConfigSet(USRBUTTON, SW2, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
 
 	//*************************************************************************
 	/*=========================== ADC config ===========================*/
@@ -164,6 +150,9 @@ void initializeADCnStuff(void)
 
 void micADC(void)
 {
+	System_printf("Inside micADC()\n");
+	System_flush();
+
 	uint32_t value[7];
 
 	int p;
@@ -186,15 +175,14 @@ void micADC(void)
 	System_printf("About to call Semaphore_post()\n");
 	System_flush();
 	Semaphore_post(semHandle);
-
-//	System_printf("About to call sendADCValuesToPi()\n");
-//	System_flush();
-//	UdpFxn();
 }
 
 
 void create_ADC_event(void)
 {
+	System_printf("Inside create_ADC_event\n");
+	System_flush();
+
 	Error_Block eb;
 	Error_init(&eb);
 	ADC_Event = Event_create(NULL, &eb);
@@ -207,6 +195,9 @@ void create_ADC_event(void)
 
 int setup_ADC_Task(int prio)
 {
+	System_printf("Inside setup_ADC_Task()\n");
+	System_flush();
+
 	Task_Params taskParams;
 	Task_Handle ADCHandle;
 	Error_Block eb;
