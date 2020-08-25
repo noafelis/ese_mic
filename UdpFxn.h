@@ -15,5 +15,6 @@ extern Semaphore_Params semParams;
 extern Semaphore_Struct sem0Struct;
 
 void UdpFxn(UArg arg0, UArg arg1);
+int setup_UDP_Task(int prio);
 
 #endif /* UDPFXN_H_ */

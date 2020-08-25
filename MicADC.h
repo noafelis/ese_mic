@@ -18,4 +18,6 @@ extern double noiseLvlValues[7];
 extern uint32_t ADCValues[7];
 extern int lastNoiseIndex;
 
+extern Event_Handle udpEvent;
+
 #endif /* MICADC_H_ */

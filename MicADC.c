@@ -21,7 +21,7 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
-
+//#include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/hal/Hwi.h>
 
 /* TI-RTOS Header files */
@@ -30,7 +30,6 @@
 #include <ti/drivers/I2C.h>
 #include <ti/drivers/UART.h>
 #include <ti/drivers/WiFi.h>
-#include <ti/sysbios/knl/Semaphore.h>
 
 /* Board Header file */
 #include "Board.h"
@@ -58,20 +57,16 @@
 
 //*************************************************************************
 /* Defines */
-#define TASKSTACKSIZE   1024
+#define TASKSTACKSIZE   2048
 
 #define USRBUTTON GPIO_PORTJ_BASE
 #define SW1 GPIO_PIN_0
 #define SW2 GPIO_PIN_1
 
-Semaphore_Handle semHandle;
-Semaphore_Struct sem0Struct;
-Semaphore_Params semParams;
-
 //*************************************************************************
 /* Global vars */
-Task_Struct task0Struct;
-Char task0Stack[TASKSTACKSIZE];
+
+Event_Handle UDP_Event;
 Event_Handle ADC_Event;
 
 //*************************************************************************
@@ -177,20 +172,9 @@ void micADC(void)
 		System_flush();
 	}
 
-
-	int semct = SemCount(semHandle);
-	System_printf("current semaphore count: %d\n", semct);
+	System_printf("Calling Event_post()\n");
 	System_flush();
-
-	System_printf("About to call Semaphore_post()\n");
-	System_flush();
-	Semaphore_post(semHandle);
-//	SemPost(semHandle);
-
-	semct = SemCount(semHandle);
-	System_printf("current semaphore count: %d\n", semct);
-	System_flush();
-
+	Event_post(UDP_Event, Event_Id_00);
 }
 
 
@@ -204,7 +188,7 @@ void create_ADC_event(void)
 	ADC_Event = Event_create(NULL, &eb);
 	if (ADC_Event == NULL)
 	{
-		System_abort("Failed to create event");
+		System_abort("Failed to create ADC event");
 	}
 }
 
@@ -224,7 +208,7 @@ int setup_ADC_Task(int prio)
 	Error_init(&eb);
 	Task_Params_init(&taskParams);
 	taskParams.arg0 = NULL;
-	taskParams.stackSize = 2048;
+	taskParams.stackSize = TASKSTACKSIZE;
 	taskParams.priority = prio;		//15: highest priority
 	ADCHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb);
 	if (ADCHandle == NULL)
@@ -232,5 +216,4 @@ int setup_ADC_Task(int prio)
 		System_abort("Error creating ADC task");
 	}
 	return 0;
-
 }

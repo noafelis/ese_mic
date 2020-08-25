@@ -23,7 +23,7 @@
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
-#include <ti/sysbios/knl/Semaphore.h>
+//#include <ti/sysbios/knl/Semaphore.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -46,8 +46,7 @@
 
 #define SW2 GPIO_PIN_1
 
-Semaphore_Handle semHandle;
-Semaphore_Struct sem0Struct;
+Event_Handle UDP_Event;
 
 /******************************************************************************
  * Function Bodies
@@ -64,40 +63,20 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 	System_printf("Inside netIPAddrHook()\n");
 	System_flush();
 
-	Task_Handle taskHandle;
-	Task_Params taskParams;
-	Error_Block eb;
-	int err;
+	Task_Handle taskHandle = NULL;
 
 	/* Create a HTTP task when the IP address is added */
 	if (fAdd && !taskHandle)
 	{
-		Error_init(&eb);
-
-		/*
-		 *  Create the Task that handles UDP "connections."
-		 *  arg0 will be the port that this task listens to.
-		 */
-		Task_Params_init(&taskParams);
-		taskParams.stackSize = UDPTASKSTACKSIZE;
-		taskParams.priority = 1;
-		taskParams.arg0 = UDPPORT;
-		taskHandle = Task_create((Task_FuncPtr) UdpFxn, &taskParams, &eb);
-		if (taskHandle == NULL)
-		{
-			err = fdError();
-			System_printf(
-					"netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
-					err);
-			System_flush();
-		}
+		System_printf("netIPAddrHook() --> calling setup_UDP_Task()\n");
+		System_flush();
+		setup_UDP_Task(4);
 	}
 
-	void *udpTaskHandle = NULL;
-
+	/*
 	System_printf("netIPAddrHook() --> calling TaskCreate()\n");
 	System_flush();
-
+	void *udpTaskHandle = NULL;
 	udpTaskHandle = TaskCreate(UdpFxn, "UdpFxn\0", OS_TASKPRINORM,
 								OS_TASKSTKNORM, 0, 0, 0);
 	if (udpTaskHandle == NULL)
@@ -106,10 +85,25 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 		System_printf("netIPAddrHook: TaskCreate() failed, error: %d\n", err);
 		System_flush();
 	}
+	*/
+
+	/*
+	System_printf("netIPAddrHook() --> create udpEvent\n");
+	System_flush();
+
+	Error_Block ebev;
+	Error_init(&ebev);
+	UDP_Event = Event_create(NULL, &ebev);
+	if (UDP_Event == NULL)
+	{
+		System_printf("Event_create() of udpEvent failed\n");
+		System_flush();
+	}
+	*/
 
 	System_printf("setup_ADC_Task()\n");
 	System_flush();
-	setup_ADC_Task(5);
+	setup_ADC_Task(4);
 }
 
 /*
@@ -128,30 +122,6 @@ int main(void)
 
 	Board_initEMAC();		// is needed for receiving IP address (apparently)
 	System_printf("Board_initEMAC()\n");
-	System_flush();
-
-/*
-	System_printf("setup_ADC_Task(4)\n");
-	System_flush();
-	setup_ADC_Task(5);
-*/
-
-	System_printf("setup binary semaphore ...\n");
-	System_flush();
-	Semaphore_Params semParams;
-	Semaphore_Params_init(&semParams);
-	semParams.mode = Semaphore_Mode_BINARY;
-	Semaphore_construct(&sem0Struct, 1, &semParams);
-	semHandle = Semaphore_handle(&sem0Struct);
-	semHandle = SemCreate(0);	// 0, so udpfxn starts out blocked
-	if (semHandle == NULL)
-	{
-		System_printf("SemCreate() failed\n");
-		System_flush();
-	}
-
-	int semct = SemCount(semHandle);
-	System_printf("current semaphore count: %d\n", semct);
 	System_flush();
 
 	/* Start BIOS */
