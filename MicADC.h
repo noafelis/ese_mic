@@ -11,6 +11,7 @@
 
 void initializeADCnStuff(void);
 void micADC(void);
+void ADC_task_fxn(UArg arg0, UArg arg1);
 void create_ADC_event(void);
 int setup_ADC_Task(int prio);
 

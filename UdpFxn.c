@@ -60,17 +60,16 @@ Event_Handle UDP_Event;
  */
 void UdpFxn(UArg arg0, UArg arg1)
 {
-	fdOpenSession((void*) Task_self());
-
-	System_printf("Inside UdpFxn()\n");
-	System_flush();
-
 	while (true)
 	{
-
 		System_printf("Calling Semaphore_pend()\n");
 		System_flush();
 		Semaphore_pend(semHandle, BIOS_WAIT_FOREVER);
+
+		fdOpenSession((void*) Task_self());
+
+		System_printf("Inside UdpFxn()\n");
+		System_flush();
 
 //>>>------------------------------------------------------------->>>
 		int err = NULL;
@@ -150,6 +149,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 		char *sendBuf = "105";
 		int bytesSent = NULL;
 		err = NULL;
+		int sendct = 1;
 
 		do
 		{
@@ -160,10 +160,17 @@ void UdpFxn(UArg arg0, UArg arg1)
 				err = fdError();
 				System_printf("sendto() of %s failed: err=%d\n", sendBuf, err);
 				System_flush();
+				sendct++;
+				if (sendct == 7)
+				{
+					System_printf("sendto() failed for %d tries\n", sendct);
+					System_flush();
+					break;
+				}
 			}
 			else if (bytesSent == sizeof(sendBuf))
 			{
-				System_printf("sendto() of %s: bytesSent=%d, bufSize=%d\n",
+				System_printf("sendto() of \"%s\": bytesSent=%d, bufSize=%d\n",
 								sendBuf, bytesSent, sizeof(sendBuf));
 				System_flush();
 			}
@@ -179,7 +186,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 		HANDLE hBuffer;
 		err = NULL;
 		int retval = NULL;
-		int recctdn = 5;
+		int recct = 1;
 
 		struct sockaddr from;
 		memset(&from, 0, sizeof(from));
@@ -192,29 +199,33 @@ void UdpFxn(UArg arg0, UArg arg1)
 										&from, &addrlen_from, &hBuffer);
 			if (retval < 0)
 			{
-				err = fdError();
-				System_printf("#%d recvnc(): err=%d [35 EWOULDBLOCK]\n",
-								recctdn, err);
-				System_flush();
-				recctdn--;
+//				err = fdError();
+//				System_printf("#%d recvnc(): err=%d [35 EWOULDBLOCK]\n", recct,	err);
+//				System_flush();
+				recct++;
 			}
 			else
 			{
 //			char piip[1024];
 //			int piip_len = 1024;
 //			inet_ntop(AF_INET, from.sa_data, piip, piip_len);
-
 //			System_printf("#%d: recvnc() received %d bytes from %s\n", recctdn, retval, piip);
 				System_printf("#%d: recvnc() received %d bytes from %d\n",
-								recctdn, retval, from.sa_data);
+								recct, retval, from.sa_data);
 				System_flush();
-				recctdn--;
+
+				recvncfree(hBuffer);
 			}
-			Task_sleep(1000);
+//			Task_sleep(1000);
+			if (recct == 7)
+			{
+				System_printf("recvnc() failed for %d tries\n", recct);
+				System_flush();
+				break;
+			}
+
 		}
 		while (retval < 0);
-
-		recvncfree(hBuffer);
 
 #endif
 //<<<-------------------------------------------------------------<<<
@@ -261,7 +272,6 @@ int setup_UDP_Task(int prio)
 		err = fdError();
 		System_printf("Failed to setup UDP task, error: %d\n", err);
 		System_flush();
-
 	}
 
 	create_UDP_event();

@@ -181,9 +181,13 @@ void micADC(void)
 
 	System_printf("semcount after calling Semaphore_post(): %d\n", Semaphore_getCount(semHandle));
 	System_flush();
-
 }
 
+void ADC_task_fxn(UArg arg0, UArg arg1)
+{
+	micADC();
+
+}
 
 void create_ADC_event(void)
 {
@@ -217,7 +221,7 @@ int setup_ADC_Task(int prio)
 	taskParams.arg0 = NULL;
 	taskParams.stackSize = TASKSTACKSIZE;
 	taskParams.priority = prio;		//15: highest priority
-	ADCHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb);
+	ADCHandle = Task_create((Task_FuncPtr)ADC_task_fxn, &taskParams, &eb);
 	if (ADCHandle == NULL)
 	{
 		System_abort("Error creating ADC task");

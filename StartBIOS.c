@@ -100,17 +100,16 @@ int main(void)
 	System_printf("Board_initEMAC()\n");
 	System_flush();
 
-
 	Error_Block eb;
 	Error_init(&eb);
 	Semaphore_Params_init(&semParams);
 	semHandle = Semaphore_create(0, &semParams, &eb);
 
-
-
-
-
-
+	if (semHandle == NULL)
+	{
+		System_printf("Semaphore_create() fauled!\n");
+		System_flush();
+	}
 
 	/* Start BIOS */
 	BIOS_start();
