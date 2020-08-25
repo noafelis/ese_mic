@@ -66,11 +66,11 @@ void UdpFxn(UArg arg0, UArg arg1)
 	System_flush();
 
 	// semaphore be posted by ADC task.
-	 if ((SemPend(semHandle, SemaphoreP_WAIT_FOREVER)) == 0)
-	 {
-		 System_printf("SemPend() failed, couldn't obtain semaphore.\n");
-		 System_flush();
-	 }
+	if ((SemPend(semHandle, SemaphoreP_WAIT_FOREVER)) == 0)
+	{
+		System_printf("SemPend() failed, couldn't obtain semaphore.\n");
+		System_flush();
+	}
 
 //>>>------------------------------------------------------------->>>
 	int err = NULL;

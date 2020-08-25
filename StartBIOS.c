@@ -107,7 +107,7 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 		System_flush();
 	}
 
-	System_printf("setup_ADC_Task(4)\n");
+	System_printf("setup_ADC_Task()\n");
 	System_flush();
 	setup_ADC_Task(5);
 }
@@ -136,14 +136,23 @@ int main(void)
 	setup_ADC_Task(5);
 */
 
-	System_printf("create semaphore\n");
+	System_printf("setup binary semaphore ...\n");
 	System_flush();
 	Semaphore_Params semParams;
 	Semaphore_Params_init(&semParams);
 	semParams.mode = Semaphore_Mode_BINARY;
 	Semaphore_construct(&sem0Struct, 1, &semParams);
 	semHandle = Semaphore_handle(&sem0Struct);
-	semHandle = SemCreate(0);
+	semHandle = SemCreate(0);	// 0, so udpfxn starts out blocked
+	if (semHandle == NULL)
+	{
+		System_printf("SemCreate() failed\n");
+		System_flush();
+	}
+
+	int semct = SemCount(semHandle);
+	System_printf("current semaphore count: %d\n", semct);
+	System_flush();
 
 	/* Start BIOS */
 	BIOS_start();

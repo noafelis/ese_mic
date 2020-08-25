@@ -1,3 +1,8 @@
+/******************************************************************************
+ * Includes
+ *******************************************************************************/
+#include <ti/ndk/inc/netmain.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -172,9 +177,20 @@ void micADC(void)
 		System_flush();
 	}
 
+
+	int semct = SemCount(semHandle);
+	System_printf("current semaphore count: %d\n", semct);
+	System_flush();
+
 	System_printf("About to call Semaphore_post()\n");
 	System_flush();
 	Semaphore_post(semHandle);
+//	SemPost(semHandle);
+
+	semct = SemCount(semHandle);
+	System_printf("current semaphore count: %d\n", semct);
+	System_flush();
+
 }
 
 
