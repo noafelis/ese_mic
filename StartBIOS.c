@@ -46,6 +46,10 @@
 
 #define SW2 GPIO_PIN_1
 
+Semaphore_Handle semHandle;
+Semaphore_Params semParams;
+Semaphore_Struct sem0Struct;
+
 Event_Handle UDP_Event;
 
 /******************************************************************************
@@ -73,37 +77,9 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 		setup_UDP_Task(4);
 	}
 
-	/*
-	System_printf("netIPAddrHook() --> calling TaskCreate()\n");
-	System_flush();
-	void *udpTaskHandle = NULL;
-	udpTaskHandle = TaskCreate(UdpFxn, "UdpFxn\0", OS_TASKPRINORM,
-								OS_TASKSTKNORM, 0, 0, 0);
-	if (udpTaskHandle == NULL)
-	{
-		err = fdError();
-		System_printf("netIPAddrHook: TaskCreate() failed, error: %d\n", err);
-		System_flush();
-	}
-	*/
-
-	/*
-	System_printf("netIPAddrHook() --> create udpEvent\n");
-	System_flush();
-
-	Error_Block ebev;
-	Error_init(&ebev);
-	UDP_Event = Event_create(NULL, &ebev);
-	if (UDP_Event == NULL)
-	{
-		System_printf("Event_create() of udpEvent failed\n");
-		System_flush();
-	}
-	*/
-
 	System_printf("setup_ADC_Task()\n");
 	System_flush();
-	setup_ADC_Task(4);
+	setup_ADC_Task(3);
 }
 
 /*
@@ -123,6 +99,18 @@ int main(void)
 	Board_initEMAC();		// is needed for receiving IP address (apparently)
 	System_printf("Board_initEMAC()\n");
 	System_flush();
+
+
+	Error_Block eb;
+	Error_init(&eb);
+	Semaphore_Params_init(&semParams);
+	semHandle = Semaphore_create(0, &semParams, &eb);
+
+
+
+
+
+
 
 	/* Start BIOS */
 	BIOS_start();

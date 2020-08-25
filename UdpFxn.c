@@ -60,180 +60,171 @@ Event_Handle UDP_Event;
  */
 void UdpFxn(UArg arg0, UArg arg1)
 {
-	fdOpenSession((void *)Task_self());
+	fdOpenSession((void*) Task_self());
 
 	System_printf("Inside UdpFxn()\n");
 	System_flush();
 
-	UInt events;
-
-	while (1)
+	while (true)
 	{
-		events = Event_pend(UDP_Event, Event_Id_NONE, Event_Id_00,
-							BIOS_WAIT_FOREVER);
 
-		if ((events & Event_Id_01) == Event_Id_00)
-		{
+		System_printf("Calling Semaphore_pend()\n");
+		System_flush();
+		Semaphore_pend(semHandle, BIOS_WAIT_FOREVER);
 
 //>>>------------------------------------------------------------->>>
-			int err = NULL;
+		int err = NULL;
 
-			struct addrinfo hints;
-			struct addrinfo *result, *rp;
-			SOCKET sockfd;
-			int s;
+		struct addrinfo hints;
+		struct addrinfo *result, *rp;
+		SOCKET sockfd;
+		int s;
 
-			memset(&hints, 0, sizeof(struct addrinfo));
-			hints.ai_family = AF_UNSPEC;    // IPv4; AF_UNSPEC -> IPv4 or IPv6
-			hints.ai_socktype = SOCK_DGRAM; // Datagram socket = UDP
-			hints.ai_flags = 0;
-			hints.ai_protocol = 0;          // Any protocol
+		memset(&hints, 0, sizeof(struct addrinfo));
+		hints.ai_family = AF_UNSPEC;    // IPv4; AF_UNSPEC -> IPv4 or IPv6
+		hints.ai_socktype = SOCK_DGRAM; // Datagram socket = UDP
+		hints.ai_flags = 0;
+		hints.ai_protocol = 0;          // Any protocol
 
-			s = getaddrinfo(SERVIP_STR, PORT_STR, &hints, &result);
+		s = getaddrinfo(SERVIP_STR, PORT_STR, &hints, &result);
+		err = NULL;
+		if (s != 0)
+		{
+			err = fdError();
+			System_printf("getaddrinfo() failed: err=%d\n", err);
+			System_flush();
+		}
+
+		for (rp = result; rp != NULL; rp = rp->ai_next)
+		{
+			sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 			err = NULL;
-			if (s != 0)
+			if (sockfd < 0)
 			{
 				err = fdError();
-				System_printf("getaddrinfo() failed: err=%d\n", err);
+				System_printf("socket() failed, err=%d\n", err);
+				System_flush();
+				continue;
+			}
+			if (sockfd > 0)
+			{
+				System_printf("Huzzah, a socket!\n");
 				System_flush();
 			}
-
-			for (rp = result; rp != NULL; rp = rp->ai_next)
-			{
-				sockfd = socket(rp->ai_family, rp->ai_socktype,
-								rp->ai_protocol);
-				err = NULL;
-				if (sockfd < 0)
-				{
-					err = fdError();
-					System_printf("socket() failed, err=%d\n", err);
-					System_flush();
-					continue;
-				}
-				if (sockfd > 0)
-				{
-					System_printf("Huzzah, a socket!\n");
-					System_flush();
-				}
-				break;
-			}
+			break;
+		}
 //<<<-------------------------------------------------------------<<<
 
 //>>>------------------------------------------------------------->>>
 #ifdef BIND
-			// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/354644?NDK-UDP-Client-Issue
-			// bind our socket to a particular port. Must bind else server reply drops!
-			struct sockaddr_in bindAddr;
-			memset(&bindAddr, 0, sizeof(bindAddr));
-			bindAddr.sin_family = AF_INET;
-			bindAddr.sin_addr.s_addr = INADDR_ANY;
-			bindAddr.sin_port = htons(1025);	// I guess just a random port?
+		// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/354644?NDK-UDP-Client-Issue
+		// bind our socket to a particular port. Must bind else server reply drops!
+		struct sockaddr_in bindAddr;
+		memset(&bindAddr, 0, sizeof(bindAddr));
+		bindAddr.sin_family = AF_INET;
+		bindAddr.sin_addr.s_addr = INADDR_ANY;
+		bindAddr.sin_port = htons(1025);	// I guess just a random port?
 
-			err = NULL;
-			if (bind(sockfd, (struct sockaddr*) &bindAddr, sizeof(bindAddr))
-					< 0)
-			{
-				err = fdError();
-				System_printf("bind() failed, err = %d\n", err);
-				System_flush();
-			}
+		err = NULL;
+		if (bind(sockfd, (struct sockaddr*) &bindAddr, sizeof(bindAddr)) < 0)
+		{
+			err = fdError();
+			System_printf("bind() failed, err = %d\n", err);
+			System_flush();
+		}
 #endif
 //<<<-------------------------------------------------------------<<<
 
 //>>>------------------------------------------------------------->>>
-			struct sockaddr_in servAddr;
+		struct sockaddr_in servAddr;
 
-			memset(&servAddr, 0, sizeof(servAddr));
-			servAddr.sin_family = AF_UNSPEC;
-			servAddr.sin_port = htons(PORT);
-			inet_aton("192.168.0.136", &servAddr.sin_addr);
+		memset(&servAddr, 0, sizeof(servAddr));
+		servAddr.sin_family = AF_UNSPEC;
+		servAddr.sin_port = htons(PORT);
+		inet_aton("192.168.0.136", &servAddr.sin_addr);
 
-			System_printf("servAddr.sin_addr.s_addr = %d\n",
-							servAddr.sin_addr.s_addr);
-			System_flush();
+		System_printf("servAddr.sin_addr.s_addr = %d\n",
+						servAddr.sin_addr.s_addr);
+		System_flush();
 
-			char *sendBuf = "105";
-			int bytesSent = NULL;
-			err = NULL;
+		char *sendBuf = "105";
+		int bytesSent = NULL;
+		err = NULL;
 
-			do
+		do
+		{
+			bytesSent = sendto(sockfd, sendBuf, sizeof(sendBuf), 0,
+								(struct sockaddr*) &servAddr, sizeof(servAddr));
+			if (bytesSent < 0)
 			{
-				bytesSent = sendto(sockfd, sendBuf, sizeof(sendBuf), 0,
-									(struct sockaddr*) &servAddr,
-									sizeof(servAddr));
-				if (bytesSent < 0)
-				{
-					err = fdError();
-					System_printf("sendto() of %s failed: err=%d\n", sendBuf,
-									err);
-					System_flush();
-				}
-				else if (bytesSent == sizeof(sendBuf))
-				{
-					System_printf("sendto() of %s: bytesSent=%d, bufSize=%d\n",
-									sendBuf, bytesSent, sizeof(sendBuf));
-					System_flush();
-				}
+				err = fdError();
+				System_printf("sendto() of %s failed: err=%d\n", sendBuf, err);
+				System_flush();
 			}
-			while (bytesSent < 0);
+			else if (bytesSent == sizeof(sendBuf))
+			{
+				System_printf("sendto() of %s: bytesSent=%d, bufSize=%d\n",
+								sendBuf, bytesSent, sizeof(sendBuf));
+				System_flush();
+			}
+		}
+		while (bytesSent < 0);
 //<<<-------------------------------------------------------------<<<
 
 //>>>------------------------------------------------------------->>>
 
 #ifdef REC_SERVREPLY
 
-			char *pBuf;
-			HANDLE hBuffer;
-			err = NULL;
-			int retval = NULL;
-			int recctdn = 5;
+		char *pBuf;
+		HANDLE hBuffer;
+		err = NULL;
+		int retval = NULL;
+		int recctdn = 5;
 
-			struct sockaddr from;
-			memset(&from, 0, sizeof(from));
-			int addrlen_from;
+		struct sockaddr from;
+		memset(&from, 0, sizeof(from));
+		int addrlen_from;
 
-			do
+		do
+		{
+			//retval = (int)recvnc(sockfd, (void **)&pBuf, MSG_DONTWAIT, &hBuffer);
+			retval = (int) recvncfrom(sockfd, (void**) &pBuf, MSG_DONTWAIT,
+										&from, &addrlen_from, &hBuffer);
+			if (retval < 0)
 			{
-				//retval = (int)recvnc(sockfd, (void **)&pBuf, MSG_DONTWAIT, &hBuffer);
-				retval = (int) recvncfrom(sockfd, (void**) &pBuf, MSG_DONTWAIT,
-											&from, &addrlen_from, &hBuffer);
-				if (retval < 0)
-				{
-					err = fdError();
-					System_printf("#%d recvnc(): err=%d [35 EWOULDBLOCK]\n",
-									recctdn, err);
-					System_flush();
-					recctdn--;
-				}
-				else
-				{
+				err = fdError();
+				System_printf("#%d recvnc(): err=%d [35 EWOULDBLOCK]\n",
+								recctdn, err);
+				System_flush();
+				recctdn--;
+			}
+			else
+			{
 //			char piip[1024];
 //			int piip_len = 1024;
 //			inet_ntop(AF_INET, from.sa_data, piip, piip_len);
 
 //			System_printf("#%d: recvnc() received %d bytes from %s\n", recctdn, retval, piip);
-					System_printf("#%d: recvnc() received %d bytes from %d\n",
-									recctdn, retval, from.sa_data);
-					System_flush();
-					recctdn--;
-				}
-				Task_sleep(1000);
+				System_printf("#%d: recvnc() received %d bytes from %d\n",
+								recctdn, retval, from.sa_data);
+				System_flush();
+				recctdn--;
 			}
-			while (retval < 0);
+			Task_sleep(1000);
+		}
+		while (retval < 0);
 
-			recvncfree(hBuffer);
+		recvncfree(hBuffer);
 
 #endif
 //<<<-------------------------------------------------------------<<<
 
-			System_printf("Calling fdClose() and fdCloseSession()\n");
-			System_flush();
-			fdClose(sockfd);
-			fdCloseSession((void*) Task_self());
-		}
+		System_printf("Calling fdClose() and fdCloseSession()\n");
+		System_flush();
+		fdClose(sockfd);
+		fdCloseSession((void*) Task_self());
 	}
 }
-
 
 void create_UDP_event(void)
 {
@@ -248,7 +239,6 @@ void create_UDP_event(void)
 		System_abort("Failed to create UDP event");
 	}
 }
-
 
 int setup_UDP_Task(int prio)
 {
@@ -265,13 +255,12 @@ int setup_UDP_Task(int prio)
 	taskParams.stackSize = TASKSTACKSIZE;
 	taskParams.priority = prio;		//15: highest priority
 	taskParams.arg0 = UDPPORT;
-	UDPHandle = Task_create((Task_FuncPtr)UdpFxn, &taskParams, &eb);
+	UDPHandle = Task_create((Task_FuncPtr) UdpFxn, &taskParams, &eb);
 	if (UDPHandle == NULL)
 	{
-			err = fdError();
-			System_printf(
-					"Failed to setup UDP task, error: %d\n", err);
-			System_flush();
+		err = fdError();
+		System_printf("Failed to setup UDP task, error: %d\n", err);
+		System_flush();
 
 	}
 

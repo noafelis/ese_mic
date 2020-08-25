@@ -172,9 +172,16 @@ void micADC(void)
 		System_flush();
 	}
 
-	System_printf("Calling Event_post()\n");
+	System_printf("semcount before calling Semaphore_post(): %d\n", Semaphore_getCount(semHandle));
 	System_flush();
-	Event_post(UDP_Event, Event_Id_00);
+
+	System_printf("Calling Semaphore_post()\n");
+	System_flush();
+	Semaphore_post(semHandle);
+
+	System_printf("semcount after calling Semaphore_post(): %d\n", Semaphore_getCount(semHandle));
+	System_flush();
+
 }
 
 
@@ -202,7 +209,7 @@ int setup_ADC_Task(int prio)
 	Task_Handle ADCHandle;
 	Error_Block eb;
 
-	create_ADC_event();
+//	create_ADC_event();
 	initializeADCnStuff();
 
 	Error_init(&eb);
