@@ -54,7 +54,7 @@
 //#define HOSTNAME          "www.example.com"
 //#define REQUEST_URI       "/"
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
-#define UDPTASKSTACKSIZE 4096
+#define TASKSTACKSIZE 4096
 #define UDPPORT 31717
 
 #define SW2 GPIO_PIN_1
@@ -74,17 +74,16 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 	System_printf("Inside netIPAddrHook()\n");
 	System_flush();
 
-	Task_Handle taskHandle = NULL;
-	//Task_Params taskParams;
-	Error_Block eb;
+	void *udpTaskHandle = NULL;
+	Error_Block eb1;
 	int err;
 
 	/* Create a HTTP task when the IP address is added */
-	if (fAdd && !taskHandle)
+	if (fAdd && !udpTaskHandle)
 	{
-		Error_init(&eb);
+		Error_init(&eb1);
 
-		void *udpTaskHandle = NULL;
+
 
 		System_printf("netIPAddrHook() --> calling TaskCreate()\n");
 		System_flush();
@@ -104,7 +103,7 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 		 *  arg0 will be the port that this task listens to.
 		 */
 		/*
-		 * Task_Params_init(&taskParams);
+		 Task_Params_init(&taskParams);
 		 taskParams.stackSize = UDPTASKSTACKSIZE;
 		 taskParams.priority = 1;
 		 taskParams.arg0 = UDPPORT;
@@ -122,6 +121,23 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 
 	initializeADCnStuff();
 
+	Task_Handle taskHandle = NULL;
+	Task_Params taskParams;
+	Error_Block eb2;
+
+	Error_init(&eb2);
+	Task_Params_init (&taskParams);
+	taskParams.stackSize = TASKSTACKSIZE;
+	taskParams.priority = 1;
+	taskHandle = Task_create((Task_FuncPtr) ADC_task_fxn, &taskParams, &eb2);
+	if (taskHandle == NULL)
+	{
+		err = fdError();
+		System_printf(
+				"netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
+				err);
+		System_flush();
+	}
 
 }
 

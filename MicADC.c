@@ -151,10 +151,6 @@ void initializeADCnStuff(void)
 
 void micADC(void)
 {
-	System_printf("\n==================================\n");
-	System_printf("Inside micADC()\n");
-	System_flush();
-
 	uint32_t value[7];
 
 	int p;
@@ -163,9 +159,17 @@ void micADC(void)
 
 	ADCSequenceDataGet(ADC0_BASE, 0, value);
 
+	int i = 1;
 	while(!ADCIntStatus(ADC0_BASE, 0, false))
 	{
 		// wait for usrbutton1 to be pressed, creating interrupt
+		if (i == 1)
+		{
+			System_printf("\n==================================\n");
+			System_printf("Inside micADC()\n");
+			System_flush();
+			i--;
+		}
 	}
 
 	for (p = 0; p <= 8; p++)
@@ -180,3 +184,4 @@ void ADC_task_fxn(UArg arg0, UArg arg1)
 	micADC();
 
 }
+

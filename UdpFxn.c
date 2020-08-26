@@ -62,7 +62,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 {
 //	fdOpenSession((void *)Task_self());
 
-	System_printf("Inside UdpFxn().\n");
+	System_printf("Inside UdpFxn()\n");
 	System_flush();
 
 	/* semaphore should be posted by ADC task.
@@ -220,7 +220,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 #endif
 //<<<-------------------------------------------------------------<<<
 
-	System_printf("Calling fdClose() ()\n");
+	System_printf("Calling fdClose()\n");
 	System_flush();
 	fdClose(sockfd);
 
