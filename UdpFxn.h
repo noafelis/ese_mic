@@ -10,10 +10,13 @@
 #ifndef UDPFXN_H_
 #define UDPFXN_H_
 
-extern Semaphore_Handle semHandle;
-extern Semaphore_Params semParams;
-extern Semaphore_Struct sem0Struct;
+extern Semaphore_Handle semHandleUDP;
+extern Semaphore_Params semParamsUDP;
+extern Semaphore_Struct semStructUDP;
+
+extern Event_Handle UDP_Event;
 
 void UdpFxn(UArg arg0, UArg arg1);
+void create_UDP_event(void);
 
 #endif /* UDPFXN_H_ */

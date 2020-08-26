@@ -83,8 +83,6 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 	{
 		Error_init(&eb1);
 
-
-
 		System_printf("netIPAddrHook() --> calling TaskCreate()\n");
 		System_flush();
 
@@ -98,6 +96,7 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 							err);
 			System_flush();
 		}
+
 		/*
 		 *  Create the Task that handles UDP "connections."
 		 *  arg0 will be the port that this task listens to.
@@ -126,10 +125,12 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 	Error_Block eb2;
 
 	Error_init(&eb2);
-	Task_Params_init (&taskParams);
+	Task_Params_init(&taskParams);
 	taskParams.stackSize = TASKSTACKSIZE;
 	taskParams.priority = 1;
 	taskHandle = Task_create((Task_FuncPtr) ADC_task_fxn, &taskParams, &eb2);
+	//taskHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb2);
+
 	if (taskHandle == NULL)
 	{
 		err = fdError();
@@ -159,14 +160,18 @@ int main(void)
 	System_printf("Board_initEMAC()\n");
 	System_flush();
 
-	/*
-	 Semaphore_Params semParams;
-	 Semaphore_Params_init(&semParams);
-	 semParams.mode = Semaphore_Mode_BINARY;
-	 Semaphore_construct(&sem0Struct, 1, &semParams);
-	 semHandle = Semaphore_handle(&sem0Struct);
-	 semHandle = SemCreate(0);
-	 */
+	Semaphore_Params semParamsUDP;
+	Error_Block ebs;
+	Error_init(&ebs);
+	Semaphore_Params_init(&semParamsUDP);
+	semParamsUDP.mode = Semaphore_Mode_BINARY;
+	semHandleUDP = Semaphore_create(0, &semParamsUDP, &ebs);
+
+	if (semHandleUDP == NULL)
+	{
+		System_printf("Semaphore_create() fauled!\n");
+		System_flush();
+	}
 
 	/* Start BIOS */
 	BIOS_start();

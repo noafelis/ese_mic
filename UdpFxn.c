@@ -27,6 +27,7 @@
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Semaphore.h>
+#include <ti/sysbios/knl/Event.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -49,8 +50,7 @@ const char *SERVIP_STR = "192.168.0.136";
 uint32_t PORT = 31717;
 uint32_t MAXBUF = 1024;
 
-Semaphore_Handle semHandle;
-Semaphore_Struct sem0Struct;
+Semaphore_Handle semHandleUDP;
 
 /******************************************************************************
  * Function Bodies
@@ -62,8 +62,14 @@ void UdpFxn(UArg arg0, UArg arg1)
 {
 //	fdOpenSession((void *)Task_self());
 
+	while (true)
+	{
+
+
 	System_printf("Inside UdpFxn()\n");
 	System_flush();
+
+//	SemPend(semHandleUDP, SemaphoreP_WAIT_FOREVER);
 
 	/* semaphore should be posted by ADC task.
 	 *
@@ -212,7 +218,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 			System_flush();
 			recctdn--;
 		}
-		Task_sleep(1000);
+		Task_sleep(1000);		//removing this breaks udp -> send fails
 	} while (retval < 0);
 
 	recvncfree(hBuffer);
@@ -227,5 +233,5 @@ void UdpFxn(UArg arg0, UArg arg1)
 //	System_printf("Calling fdCloseSession()\n");
 //	System_flush();
 //	fdCloseSession((void*) Task_self());
+	}
 }
-

@@ -16,7 +16,7 @@ BIOS_INC  = -I"C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/"
 
 TARGET_INC = -I"C:/ti/tirtos_tivac_2_16_01_14/products/bios_6_45_02_31/packages/"
 
-INCS = $(BIOS_INC) $(TARGET_INC)  --include_path="C:/Users/noa/workspace_v10/ese_mic_UDPonly" --include_path="C:/ti/tirtos_tivac_2_16_01_14/products/ndk_2_25_00_09/packages/ti/ndk/inc/bsd" --include_path="C:/Users/noa/workspace_v10/ese_mic_UDPonly" --include_path="C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b" --include_path="C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include" 
+INCS = $(BIOS_INC) $(TARGET_INC)  --include_path="C:/Users/noa/workspace_v10/ese_mic_spaghetti" --include_path="C:/ti/tirtos_tivac_2_16_01_14/products/ndk_2_25_00_09/packages/ti/ndk/inc/bsd" --include_path="C:/Users/noa/workspace_v10/ese_mic_spaghetti" --include_path="C:/ti/tirtos_tivac_2_16_01_14/products/TivaWare_C_Series-2.1.1.71b" --include_path="C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include" 
 
 CC = C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armcl -c $(CCOPTS) -I C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include
 ASM = C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armcl -c $(CCOPTS) -I C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include

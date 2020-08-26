@@ -1,0 +1,17 @@
+Board_initGeneral()
+Board_initGPIO()
+Using MAC address in flash
+Board_initEMAC()
+createSockThread()
+Huzzah, a socket!
+servAddr.sin_addr.s_addr = -2013222720sendto() failed: err=6
+Service Status: DHCPC    : Enabled  :          : 000
+Service Status: DHCPC    : Enabled  : Running  : 000
+sendto() failed: err=6
+sendto() failed: err=6
+sendto() failed: err=6
+Network Added: If-1:192.168.0.17
+Service Status: DHCPC    : Enabled  : Running  : 017
+at least sendto() didn't produce an error, maybe? data=4
+at least sendto() didn't produce an error, maybe? data=4
+at least sendto() didn't produce an error, maybe? data=4

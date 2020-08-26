@@ -11,6 +11,7 @@ GEN_CMDS__FLAG := -l"configPkg/linker.cmd"
 
 ORDERED_OBJS += \
 "./EK_TM4C1294XL.obj" \
+"./MicADC.obj" \
 "./StartBIOS.obj" \
 "./UdpFxn.obj" \
 "../EK_TM4C1294XL.cmd" \
@@ -125,42 +126,42 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-ese_mic_UDPonly.out \
+ese_mic_spaghetti.out \
 
 EXE_OUTPUTS__QUOTED += \
-"ese_mic_UDPonly.out" \
+"ese_mic_spaghetti.out" \
 
 BIN_OUTPUTS += \
-ese_mic_UDPonly.hex \
+ese_mic_spaghetti.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"ese_mic_UDPonly.hex" \
+"ese_mic_spaghetti.hex" \
 
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "ese_mic_UDPonly.out"
+	@$(MAKE) --no-print-directory -Onone "ese_mic_spaghetti.out"
 
 # Tool invocations
-ese_mic_UDPonly.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+ese_mic_spaghetti.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: ARM Linker'
-	"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C1294NCPDT --define=NET_NDK --define=ccs --define=TIVAWARE -g --gcc --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"ese_mic_UDPonly.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/lib" -i"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="ese_mic_UDPonly_linkInfo.xml" --rom_model -o "ese_mic_UDPonly.out" $(ORDERED_OBJS)
+	"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --define=ccs="ccs" --define=PART_TM4C1294NCPDT --define=NET_NDK --define=ccs --define=TIVAWARE -g --gcc --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"ese_mic_spaghetti.map" --heap_size=0 --stack_size=512 -i"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/lib" -i"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="ese_mic_spaghetti_linkInfo.xml" --rom_model -o "ese_mic_spaghetti.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-ese_mic_UDPonly.hex: $(EXE_OUTPUTS)
+ese_mic_spaghetti.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo 'Invoking: ARM Hex Utility'
-	"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armhex"  -o "ese_mic_UDPonly.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS/bin/armhex"  -o "ese_mic_spaghetti.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "EK_TM4C1294XL.obj" "StartBIOS.obj" "UdpFxn.obj" 
-	-$(RM) "EK_TM4C1294XL.d" "StartBIOS.d" "UdpFxn.d" 
+	-$(RM) "EK_TM4C1294XL.obj" "MicADC.obj" "StartBIOS.obj" "UdpFxn.obj" 
+	-$(RM) "EK_TM4C1294XL.d" "MicADC.d" "StartBIOS.d" "UdpFxn.d" 
 	-$(RMDIR) $(GEN_MISC_DIRS__QUOTED)
 	-@echo 'Finished clean'
 	-@echo ' '

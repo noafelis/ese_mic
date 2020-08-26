@@ -13,6 +13,7 @@ CMD_SRCS += \
 
 C_SRCS += \
 ../EK_TM4C1294XL.c \
+../MicADC.c \
 ../StartBIOS.c \
 ../UdpFxn.c 
 
@@ -28,6 +29,7 @@ GEN_MISC_DIRS += \
 
 C_DEPS += \
 ./EK_TM4C1294XL.d \
+./MicADC.d \
 ./StartBIOS.d \
 ./UdpFxn.d 
 
@@ -36,6 +38,7 @@ GEN_OPTS += \
 
 OBJS += \
 ./EK_TM4C1294XL.obj \
+./MicADC.obj \
 ./StartBIOS.obj \
 ./UdpFxn.obj 
 
@@ -44,11 +47,13 @@ GEN_MISC_DIRS__QUOTED += \
 
 OBJS__QUOTED += \
 "EK_TM4C1294XL.obj" \
+"MicADC.obj" \
 "StartBIOS.obj" \
 "UdpFxn.obj" 
 
 C_DEPS__QUOTED += \
 "EK_TM4C1294XL.d" \
+"MicADC.d" \
 "StartBIOS.d" \
 "UdpFxn.d" 
 
@@ -58,6 +63,7 @@ GEN_FILES__QUOTED += \
 
 C_SRCS__QUOTED += \
 "../EK_TM4C1294XL.c" \
+"../MicADC.c" \
 "../StartBIOS.c" \
 "../UdpFxn.c" 
 

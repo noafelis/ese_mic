@@ -21,7 +21,7 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
-//#include <ti/sysbios/knl/Semaphore.h>
+#include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/hal/Hwi.h>
 
 /* TI-RTOS Header files */
@@ -30,6 +30,7 @@
 #include <ti/drivers/I2C.h>
 #include <ti/drivers/UART.h>
 #include <ti/drivers/WiFi.h>
+#include <ti/drivers/ports/SemaphoreP.h>
 
 /* Board Header file */
 #include "Board.h"
@@ -63,11 +64,12 @@
 #define SW1 GPIO_PIN_0
 #define SW2 GPIO_PIN_1
 
+Semaphore_Handle semHandleUDP;
+
 //*************************************************************************
 /* Global vars */
 
 Event_Handle UDP_Event;
-Event_Handle ADC_Event;
 
 //*************************************************************************
 /* Fctn declarations */
@@ -160,6 +162,8 @@ void micADC(void)
 	ADCSequenceDataGet(ADC0_BASE, 0, value);
 
 	int i = 1;
+
+
 	while(!ADCIntStatus(ADC0_BASE, 0, false))
 	{
 		// wait for usrbutton1 to be pressed, creating interrupt
@@ -177,11 +181,16 @@ void micADC(void)
 		System_printf("AIN9, reading %d = %4d\n", p, value[p]);
 		System_flush();
 	}
+
+	SemPost(semHandleUDP);
+
 }
 
 void ADC_task_fxn(UArg arg0, UArg arg1)
 {
 	micADC();
+	System_printf("--------------------\n");
+		System_flush();
 
 }
 

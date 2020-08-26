@@ -11,7 +11,7 @@ var makeAssembly = false;
 var Executable = xdc.module('xdc.bld.Executable');
 
 var exeOpts = new Executable.Attrs({
-        cfgScript: 'C:/Users/noa/workspace_v10/ese_mic_UDPonly/ese_mic.cfg',
+        cfgScript: 'C:/Users/noa/workspace_v10/ese_mic_spaghetti/ese_mic.cfg',
         profile: 'debug',
         cfgHome: 'configPkg',
 });
@@ -41,7 +41,7 @@ else {
 
 var thisObj = {
     cfg:        '../ese_mic.cfg',
-    outputPath: 'C:/Users/noa/workspace_v10/ese_mic_UDPonly/Debug/configPkg',
+    outputPath: 'C:/Users/noa/workspace_v10/ese_mic_spaghetti/Debug/configPkg',
     exeName:    'ese_mic' + suffix,
     exeIntName: 'ese_mic' + suffix.replace('.', '_'),
     targ:       targ,
