@@ -151,7 +151,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 	System_printf("servAddr.sin_addr.s_addr = %d\n", servAddr.sin_addr.s_addr);
 	System_flush();
 
-	char *sendBuf = "105";
+	char *sendBuf = "spaghetti";
 	int bytesSent = NULL;
 	err = NULL;
 
@@ -220,9 +220,12 @@ void UdpFxn(UArg arg0, UArg arg1)
 #endif
 //<<<-------------------------------------------------------------<<<
 
-	System_printf("Calling fdClose() and fdCloseSession()\n");
+	System_printf("Calling fdClose() ()\n");
 	System_flush();
 	fdClose(sockfd);
-	fdCloseSession((void*) Task_self());
+
+//	System_printf("Calling fdCloseSession()\n");
+//	System_flush();
+//	fdCloseSession((void*) Task_self());
 }
 

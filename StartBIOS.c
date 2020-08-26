@@ -44,6 +44,7 @@
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
+#include <MicADC.h>
 
 /* Bad Global Variables */
 //Event_Handle Pi_Event;
@@ -57,9 +58,6 @@
 #define UDPPORT 31717
 
 #define SW2 GPIO_PIN_1
-
-Semaphore_Handle semHandle;
-Semaphore_Struct sem0Struct;
 
 /******************************************************************************
  * Function Bodies
@@ -76,8 +74,8 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 	System_printf("Inside netIPAddrHook()\n");
 	System_flush();
 
-	Task_Handle taskHandle;
-	Task_Params taskParams;
+	Task_Handle taskHandle = NULL;
+	//Task_Params taskParams;
 	Error_Block eb;
 	int err;
 
@@ -86,38 +84,45 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 	{
 		Error_init(&eb);
 
+		void *udpTaskHandle = NULL;
+
+		System_printf("netIPAddrHook() --> calling TaskCreate()\n");
+		System_flush();
+
+		udpTaskHandle = TaskCreate(UdpFxn, "UdpFxn\0", OS_TASKPRINORM,
+		OS_TASKSTKNORM,
+									0, 0, 0);
+		if (udpTaskHandle == NULL)
+		{
+			err = fdError();
+			System_printf("netIPAddrHook: TaskCreate() failed, error: %d\n",
+							err);
+			System_flush();
+		}
 		/*
 		 *  Create the Task that handles UDP "connections."
 		 *  arg0 will be the port that this task listens to.
 		 */
-		Task_Params_init(&taskParams);
-		taskParams.stackSize = UDPTASKSTACKSIZE;
-		taskParams.priority = 1;
-		taskParams.arg0 = UDPPORT;
-		taskHandle = Task_create((Task_FuncPtr) UdpFxn, &taskParams, &eb);
-		if (taskHandle == NULL)
-		{
-			err = fdError();
-			System_printf(
-					"netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
-					err);
-			System_flush();
-		}
+		/*
+		 * Task_Params_init(&taskParams);
+		 taskParams.stackSize = UDPTASKSTACKSIZE;
+		 taskParams.priority = 1;
+		 taskParams.arg0 = UDPPORT;
+		 taskHandle = Task_create((Task_FuncPtr) UdpFxn, &taskParams, &eb);
+		 if (taskHandle == NULL)
+		 {
+		 err = fdError();
+		 System_printf(
+		 "netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
+		 err);
+		 System_flush();
+		 }
+		 */
 	}
 
-	void *udpTaskHandle = NULL;
+	initializeADCnStuff();
 
-	System_printf("netIPAddrHook() --> calling TaskCreate()\n");
-	System_flush();
 
-	udpTaskHandle = TaskCreate(UdpFxn, "UdpFxn\0", OS_TASKPRINORM,
-								OS_TASKSTKNORM, 0, 0, 0);
-	if (udpTaskHandle == NULL)
-	{
-		err = fdError();
-		System_printf("netIPAddrHook: TaskCreate() failed, error: %d\n", err);
-		System_flush();
-	}
 }
 
 /*
