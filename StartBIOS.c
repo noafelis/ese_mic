@@ -177,7 +177,6 @@ int main(void)
     mbxHandle = Mailbox_handle(&mbxStruct);
 
 
-
 	/* Start BIOS */
 	BIOS_start();
 

@@ -20,13 +20,14 @@
 
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
-#include <ti/drivers/ports/SemaphoreP.h>
+//#include <ti/drivers/ports/SemaphoreP.h>
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
-#include <ti/sysbios/knl/Semaphore.h>
+#include <ti/sysbios/knl/Mailbox.h>
+//#include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/knl/Event.h>
 
 #include "inc/hw_memmap.h"

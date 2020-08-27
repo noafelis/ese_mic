@@ -21,7 +21,8 @@
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
-#include <ti/sysbios/knl/Semaphore.h>
+#include <ti/sysbios/knl/Mailbox.h>
+//#include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/hal/Hwi.h>
 
 /* TI-RTOS Header files */
@@ -102,14 +103,14 @@ void initializeADCnStuff(void)
 	//Setzen von Treiberstaerke, Richtung f die gewuenschten ADC Pins (???)
 	GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_4);
 
-	while(!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0))
+	while (!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0))
 	{
 	}
 
 	//Bit 0 and bit 1 of RCGCADC register are used to enable the clock to ADC0 and ADC1 modules, respectively.
 	//The RCGCADC is part of the System Control register and is located at base address of 0x400F.E000 with offset 0x638
 	//Konfigurieren der Taktquelle, aus der sich der interne ADC Takt ableiten soll
-	ADCClockConfigSet(ADC0_BASE, ADC_CLOCK_SRC_PLL | ADC_CLOCK_RATE_HALF, 24);  //just used any values from TivaWare Periph Driver Lib Userguide p25
+	ADCClockConfigSet(ADC0_BASE, ADC_CLOCK_SRC_PLL | ADC_CLOCK_RATE_HALF, 24); //just used any values from TivaWare Periph Driver Lib Userguide p25
 
 	//jedes der 2 ADC Module verfügt über mehrere Sequencer, die über mehrere Steps programmiert werden können
 	//Deaktiveren eines Sequencers
@@ -125,7 +126,8 @@ void initializeADCnStuff(void)
 	ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_EXTERNAL, 0);
 
 	//Config ein/mehr Steps innerhalb Sequence
-	ADCSequenceStepConfigure(ADC0_BASE, 0 , 0, ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0); //??? Reihenfolge der ADC_CTL-xxx???
+	ADCSequenceStepConfigure(ADC0_BASE, 0, 0,
+								ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0); //??? Reihenfolge der ADC_CTL-xxx???
 
 	//Aktivieren der Sequence
 	ADCSequenceEnable(ADC0_BASE, 0);
@@ -142,8 +144,6 @@ void initializeADCnStuff(void)
 	ADCSequenceDataGet(ADC0_BASE, 0, &buffer);
 }
 
-
-
 void micADC(void)
 {
 	uint32_t value[7];
@@ -156,8 +156,7 @@ void micADC(void)
 
 	int i = 1;
 
-
-	while(!ADCIntStatus(ADC0_BASE, 0, false))
+	while (!ADCIntStatus(ADC0_BASE, 0, false))
 	{
 		// wait for usrbutton1 to be pressed, creating interrupt
 		if (i == 1)
@@ -174,13 +173,34 @@ void micADC(void)
 		System_printf("AIN9, reading %d = %4d\n", p, value[p]);
 		System_flush();
 	}
+
+
+
+
+	MsgObj msg;
+	msg.id = 1;
+	msg.val = 'a';
+
+	if (Mailbox_post(mbxHandle, &msg, BIOS_NO_WAIT))
+	{
+
+		System_printf("Mailbox Write: ID = %d and Value = '%c'.\n", msg.id,
+						msg.val);
+		System_flush();
+	}
+	else
+	{
+		System_printf("Mailbox Write Failed: ID = %d and Value = '%c'.\n",
+						msg.id, msg.val);
+		System_flush();
+	}
+
 }
 
 void ADC_task_fxn(UArg arg0, UArg arg1)
 {
 	micADC();
 	System_printf("--------------------\n");
-		System_flush();
+	System_flush();
 
 }
-
