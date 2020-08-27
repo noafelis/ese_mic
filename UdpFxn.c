@@ -70,7 +70,14 @@ void UdpFxn(UArg arg0, UArg arg1)
 	System_printf("Inside UdpFxn()\n");
 	System_flush();
 
-//	SemPend(semHandleUDP, SemaphoreP_WAIT_FOREVER);
+	int sect = SemCount(semHandleUDP);
+	System_printf("SemCount(semHandleUDP) = %d\n", sect);
+	System_flush();
+
+	int sepd = SemPend(semHandleUDP, SemaphoreP_WAIT_FOREVER);
+//	int sepd = SemPend(semHandleUDP, 1000);
+	System_printf("SemPend(semHandleUDP) = %d\n", sepd);
+	System_flush();
 
 	/* semaphore should be posted by ADC task.
 	 *

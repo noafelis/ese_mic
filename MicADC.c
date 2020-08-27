@@ -64,12 +64,10 @@
 #define SW1 GPIO_PIN_0
 #define SW2 GPIO_PIN_1
 
-Semaphore_Handle semHandleUDP;
-
 //*************************************************************************
 /* Global vars */
 
-Event_Handle UDP_Event;
+Semaphore_Handle semHandleUDP;
 
 //*************************************************************************
 /* Fctn declarations */
@@ -182,8 +180,14 @@ void micADC(void)
 		System_flush();
 	}
 
+	int sect = SemCount(semHandleUDP);
+	System_printf("SemCount(semHandleUDP) = %d\n", sect);
+	System_flush();
+
 	SemPost(semHandleUDP);
 
+	System_printf("SemCount(semHandleUDP) = %d\n", sect);
+	System_flush();
 }
 
 void ADC_task_fxn(UArg arg0, UArg arg1)
