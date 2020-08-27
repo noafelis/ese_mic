@@ -9,11 +9,13 @@
 #ifndef MICADC_H_
 #define MICADC_H_
 
-extern double noiseLvlAvg;
-extern double noiseLvlValues[7];
-extern uint32_t ADCValues[7];
-extern int lastNoiseIndex;
+//*************************************************************************
+/* Defines */
+#define USRBUTTON GPIO_PORTJ_BASE
+#define SW1 GPIO_PIN_0
+#define SW2 GPIO_PIN_1
 
+//interrupt void micISR(void);
 void initializeADCnStuff(void);
 void micADC(void);
 void ADC_task_fxn(UArg arg0, UArg arg1);

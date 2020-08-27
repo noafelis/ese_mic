@@ -31,7 +31,8 @@
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
-#include <ti/sysbios/knl/Semaphore.h>
+#include <ti/sysbios/knl/Mailbox.h>
+//#include <ti/sysbios/knl/Semaphore.h>
 //#include <ti/sysbios/hal/Hwi.h>
 
 #include "inc/hw_memmap.h"
@@ -45,6 +46,7 @@
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
 #include <MicADC.h>
+#include <shared_resources.h>
 
 /* Bad Global Variables */
 //Event_Handle Pi_Event;
@@ -58,6 +60,11 @@
 #define UDPPORT 31717
 
 #define SW2 GPIO_PIN_1
+
+
+MailboxMsgObj mailboxBuffer[NUMMSGS];
+Mailbox_Struct mbxStruct;
+Mailbox_Handle mbxHandle;
 
 /******************************************************************************
  * Function Bodies
@@ -146,6 +153,8 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
  */
 int main(void)
 {
+	Mailbox_Params mbxParams;
+
 	/* Call board init functions */
 	Board_initGeneral();
 	System_printf("Board_initGeneral()\n");
@@ -158,6 +167,15 @@ int main(void)
 	Board_initEMAC();		// is needed for receiving IP address (apparently)
 	System_printf("Board_initEMAC()\n");
 	System_flush();
+
+
+	/* Construct a Mailbox instance */
+    Mailbox_Params_init(&mbxParams);
+    mbxParams.buf = (Ptr)mailboxBuffer;
+    mbxParams.bufSize = sizeof(mailboxBuffer);
+    Mailbox_construct(&mbxStruct, sizeof(MsgObj), NUMMSGS, &mbxParams, NULL);
+    mbxHandle = Mailbox_handle(&mbxStruct);
+
 
 
 	/* Start BIOS */

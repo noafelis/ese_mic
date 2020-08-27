@@ -53,24 +53,21 @@
 #include <driverlib/adc.h>
 
 /* Application headers */
-
+#include <MicADC.h>
 #include <UdpFxn.h>
-
-//*************************************************************************
-/* Defines */
-#define TASKSTACKSIZE   5120
-
-#define USRBUTTON GPIO_PORTJ_BASE
-#define SW1 GPIO_PIN_0
-#define SW2 GPIO_PIN_1
-
-//*************************************************************************
-/* Global vars */
+#include <shared_resources.h>
 
 //*************************************************************************
 /* Fctn declarations */
-interrupt void micISR(void);
+//interrupt void micISR(void); //TODO
+/*
+ * für Button eigene ISR, die ein Event postet
+ * ADC-Task pendet auf dieses Event ->
+ * liest erst dann Daten aus
+ */
+void initializeADCnStuff(void);
 void micADC(void);
+void ADC_task_fxn(UArg arg0, UArg arg1);
 
 //*************************************************************************
 

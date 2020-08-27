@@ -39,9 +39,10 @@
 #include <driverlib/pin_map.h>
 #include <driverlib/interrupt.h>
 #include <UdpFxn.h>
+#include <MicADC.h>
+#include <shared_resources.h>
 
 #define USER_AGENT "HTTPCli (ARM; TI-RTOS)"
-#define HTTPTASKSTACKSIZE 4096
 
 const char *PORT_STR = "31717";
 const char *SERVIP_STR = "192.168.0.136";
