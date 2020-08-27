@@ -70,7 +70,7 @@
 
 void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 {
-
+	System_printf("\n==================================\n");
 	System_printf("Inside netIPAddrHook()\n");
 	System_flush();
 

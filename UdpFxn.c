@@ -62,10 +62,11 @@ void UdpFxn(UArg arg0, UArg arg1)
 {
 //	fdOpenSession((void *)Task_self());
 
-	while (true)
+	int ct = 0;
+	while (ct < 5)
 	{
 
-
+	System_printf("\n==================================\n");
 	System_printf("Inside UdpFxn()\n");
 	System_flush();
 
@@ -198,8 +199,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 
 	do
 	{
-		//retval = (int)recvnc(sockfd, (void **)&pBuf, MSG_DONTWAIT, &hBuffer);
-		retval = (int)recvncfrom(sockfd, (void **)&pBuf, MSG_DONTWAIT, &from, &addrlen_from, &hBuffer);
+		retval = (int)recvncfrom(sockfd, (void **)&pBuf, MSG_WAITALL, &from, &addrlen_from, &hBuffer);
 		if (retval < 0)
 		{
 			err = fdError();
@@ -209,16 +209,10 @@ void UdpFxn(UArg arg0, UArg arg1)
 		}
 		else
 		{
-//			char piip[1024];
-//			int piip_len = 1024;
-//			inet_ntop(AF_INET, from.sa_data, piip, piip_len);
-
-//			System_printf("#%d: recvnc() received %d bytes from %s\n", recctdn, retval, piip);
 			System_printf("#%d: recvnc() received %d bytes from %d\n", recctdn, retval, from.sa_data);
 			System_flush();
 			recctdn--;
 		}
-		Task_sleep(1000);		//removing this breaks udp -> send fails
 	} while (retval < 0);
 
 	recvncfree(hBuffer);
@@ -229,6 +223,8 @@ void UdpFxn(UArg arg0, UArg arg1)
 	System_printf("Calling fdClose()\n");
 	System_flush();
 	fdClose(sockfd);
+
+	ct++;
 
 //	System_printf("Calling fdCloseSession()\n");
 //	System_flush();
