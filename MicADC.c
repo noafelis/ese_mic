@@ -67,8 +67,6 @@
 //*************************************************************************
 /* Global vars */
 
-Semaphore_Handle semHandleUDP;
-
 //*************************************************************************
 /* Fctn declarations */
 interrupt void micISR(void);
@@ -167,7 +165,7 @@ void micADC(void)
 		// wait for usrbutton1 to be pressed, creating interrupt
 		if (i == 1)
 		{
-			System_printf("\n==================================\n");
+			System_printf("\n>>>------------------------------->>>\n");
 			System_printf("Inside micADC()\n");
 			System_flush();
 			i--;
@@ -179,15 +177,6 @@ void micADC(void)
 		System_printf("AIN9, reading %d = %4d\n", p, value[p]);
 		System_flush();
 	}
-
-	int sect = SemCount(semHandleUDP);
-	System_printf("SemCount(semHandleUDP) = %d\n", sect);
-	System_flush();
-
-	SemPost(semHandleUDP);
-
-	System_printf("SemCount(semHandleUDP) = %d\n", sect);
-	System_flush();
 }
 
 void ADC_task_fxn(UArg arg0, UArg arg1)

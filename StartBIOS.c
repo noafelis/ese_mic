@@ -139,7 +139,6 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 				err);
 		System_flush();
 	}
-
 }
 
 /*
@@ -158,23 +157,6 @@ int main(void)
 
 	Board_initEMAC();		// is needed for receiving IP address (apparently)
 	System_printf("Board_initEMAC()\n");
-	System_flush();
-
-	Semaphore_Params semParamsUDP;
-	Error_Block ebs;
-	Error_init(&ebs);
-	Semaphore_Params_init(&semParamsUDP);
-	semParamsUDP.mode = Semaphore_Mode_BINARY;
-	semHandleUDP = Semaphore_create(1, &semParamsUDP, &ebs);
-
-	if (semHandleUDP == NULL)
-	{
-		System_printf("Semaphore_create() fauled!\n");
-		System_flush();
-	}
-
-	int sect = SemCount(semHandleUDP);
-	System_printf("SemCount(semHandleUDP) = %d\n", sect);
 	System_flush();
 
 

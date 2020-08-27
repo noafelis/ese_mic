@@ -14,10 +14,6 @@ extern double noiseLvlValues[7];
 extern uint32_t ADCValues[7];
 extern int lastNoiseIndex;
 
-extern Semaphore_Handle semHandleADC;
-extern Semaphore_Params semParamsADC;
-extern Semaphore_Struct semStructADC;
-
 void initializeADCnStuff(void);
 void micADC(void);
 void ADC_task_fxn(UArg arg0, UArg arg1);

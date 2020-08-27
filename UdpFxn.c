@@ -42,15 +42,11 @@
 
 #define USER_AGENT "HTTPCli (ARM; TI-RTOS)"
 #define HTTPTASKSTACKSIZE 4096
-#define BIND
-#define REC_SERVREPLY
 
 const char *PORT_STR = "31717";
 const char *SERVIP_STR = "192.168.0.136";
 uint32_t PORT = 31717;
 uint32_t MAXBUF = 1024;
-
-Semaphore_Handle semHandleUDP;
 
 /******************************************************************************
  * Function Bodies
@@ -63,31 +59,12 @@ void UdpFxn(UArg arg0, UArg arg1)
 //	fdOpenSession((void *)Task_self());
 
 	int ct = 0;
-	while (ct < 5)
+	while (ct < 3)
 	{
 
-	System_printf("\n==================================\n");
+	System_printf("\n>>>------------------------------->>>\n");
 	System_printf("Inside UdpFxn()\n");
 	System_flush();
-
-	int sect = SemCount(semHandleUDP);
-	System_printf("SemCount(semHandleUDP) = %d\n", sect);
-	System_flush();
-
-	int sepd = SemPend(semHandleUDP, SemaphoreP_WAIT_FOREVER);
-//	int sepd = SemPend(semHandleUDP, 1000);
-	System_printf("SemPend(semHandleUDP) = %d\n", sepd);
-	System_flush();
-
-	/* semaphore should be posted by ADC task.
-	 *
-	 *
-	 if ((SemPend(semHandle, SemaphoreP_WAIT_FOREVER)) == 0)
-	 {
-	 System_printf("SemPend() failed, couldn't obtain semaphore.\n");
-	 System_flush();
-	 }
-	 */
 
 //>>>------------------------------------------------------------->>>
 	int err = NULL;
@@ -134,9 +111,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 
 
 //>>>------------------------------------------------------------->>>
-#ifdef BIND
 	// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/354644?NDK-UDP-Client-Issue
-	// bind our socket to a particular port. Must bind else server reply drops!
 	struct sockaddr_in bindAddr;
 	memset(&bindAddr, 0, sizeof(bindAddr));
 	bindAddr.sin_family = AF_INET;
@@ -150,7 +125,6 @@ void UdpFxn(UArg arg0, UArg arg1)
 		System_printf("bind() failed, err = %d\n", err);
 		System_flush();
 	}
-#endif
 //<<<-------------------------------------------------------------<<<
 
 
@@ -186,45 +160,6 @@ void UdpFxn(UArg arg0, UArg arg1)
 			System_flush();
 		}
 	} while (bytesSent < 0);
-//<<<-------------------------------------------------------------<<<
-
-
-
-//>>>------------------------------------------------------------->>>
-
-#ifdef REC_SERVREPLY
-
-	char *pBuf;
-	HANDLE hBuffer;
-	err = NULL;
-	int retval = NULL;
-	int recctdn = 5;
-
-	struct sockaddr from;
-	memset(&from, 0, sizeof(from));
-	int addrlen_from;
-
-	do
-	{
-		retval = (int)recvncfrom(sockfd, (void **)&pBuf, MSG_WAITALL, &from, &addrlen_from, &hBuffer);
-		if (retval < 0)
-		{
-			err = fdError();
-			System_printf("#%d recvnc(): err=%d [35 EWOULDBLOCK]\n", recctdn, err);
-			System_flush();
-			recctdn--;
-		}
-		else
-		{
-			System_printf("#%d: recvnc() received %d bytes from %d\n", recctdn, retval, from.sa_data);
-			System_flush();
-			recctdn--;
-		}
-	} while (retval < 0);
-
-	recvncfree(hBuffer);
-
-#endif
 //<<<-------------------------------------------------------------<<<
 
 	System_printf("Calling fdClose()\n");
