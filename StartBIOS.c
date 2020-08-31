@@ -77,38 +77,38 @@ Mailbox_Handle mbxHandle;
 
 void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 {
-	System_printf("\n==================================\n");
-	System_printf("Inside netIPAddrHook()\n");
-	System_flush();
+    System_printf("\n==================================\n");
+    System_printf("Inside netIPAddrHook()\n");
+    System_flush();
 
-	void *udpTaskHandle = NULL;
-	Error_Block eb1;
-	int err;
+    void *udpTaskHandle = NULL;
+    Error_Block eb1;
+    int err;
 
-	/* Create a HTTP task when the IP address is added */
-	if (fAdd && !udpTaskHandle)
-	{
-		Error_init(&eb1);
+    /* Create a HTTP task when the IP address is added */
+    if (fAdd && !udpTaskHandle)
+    {
+        Error_init(&eb1);
 
-		System_printf("netIPAddrHook() --> calling TaskCreate()\n");
-		System_flush();
+        System_printf("netIPAddrHook() --> calling TaskCreate()\n");
+        System_flush();
 
-		udpTaskHandle = TaskCreate(UdpFxn, "UdpFxn\0", OS_TASKPRINORM,
-		OS_TASKSTKNORM,
-									0, 0, 0);
-		if (udpTaskHandle == NULL)
-		{
-			err = fdError();
-			System_printf("netIPAddrHook: TaskCreate() failed, error: %d\n",
-							err);
-			System_flush();
-		}
+        udpTaskHandle = TaskCreate(UdpFxn, "UdpFxn\0", OS_TASKPRIHIGH,
+                                   OS_TASKSTKNORM,
+                                   0, 0, 0);
+        if (udpTaskHandle == NULL)
+        {
+            err = fdError();
+            System_printf("netIPAddrHook: TaskCreate() failed, error: %d\n",
+                          err);
+            System_flush();
+        }
 
-		/*
-		 *  Create the Task that handles UDP "connections."
-		 *  arg0 will be the port that this task listens to.
-		 */
-		/*
+        /*
+         *  Create the Task that handles UDP "connections."
+         *  arg0 will be the port that this task listens to.
+         */
+        /*
 		 Task_Params_init(&taskParams);
 		 taskParams.stackSize = UDPTASKSTACKSIZE;
 		 taskParams.priority = 1;
@@ -122,30 +122,31 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
 		 err);
 		 System_flush();
 		 }
-		 */
-	}
+         */
+    }
 
-	initializeADCnStuff();
 
-	Task_Handle taskHandle = NULL;
-	Task_Params taskParams;
-	Error_Block eb2;
+    initializeADCnStuff();
 
-	Error_init(&eb2);
-	Task_Params_init(&taskParams);
-	taskParams.stackSize = TASKSTACKSIZE;
+    Task_Handle taskHandle = NULL;
+    Task_Params taskParams;
+    Error_Block eb2;
+
+    Error_init(&eb2);
+    Task_Params_init(&taskParams);
+    taskParams.stackSize = TASKSTACKSIZE;
 	taskParams.priority = 1;
-	taskHandle = Task_create((Task_FuncPtr) ADC_task_fxn, &taskParams, &eb2);
-	//taskHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb2);
+    taskHandle = Task_create((Task_FuncPtr) ADC_task_fxn, &taskParams, &eb2);
+    //taskHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb2);
 
-	if (taskHandle == NULL)
-	{
-		err = fdError();
-		System_printf(
-				"netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
-				err);
-		System_flush();
-	}
+    if (taskHandle == NULL)
+    {
+        err = fdError();
+        System_printf(
+                "netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
+                err);
+        System_flush();
+    }
 }
 
 /*
@@ -153,32 +154,30 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
  */
 int main(void)
 {
-	Mailbox_Params mbxParams;
+    Mailbox_Params mbxParams;
 
-	/* Call board init functions */
-	Board_initGeneral();
-	System_printf("Board_initGeneral()\n");
-	System_flush();
+    /* Call board init functions */
+    Board_initGeneral();
+    System_printf("Board_initGeneral()\n");
+    System_flush();
 
-	Board_initGPIO();
-	System_printf("Board_initGPIO()\n");
-	System_flush();
+    Board_initGPIO();
+    System_printf("Board_initGPIO()\n");
+    System_flush();
 
-	Board_initEMAC();		// is needed for receiving IP address (apparently)
-	System_printf("Board_initEMAC()\n");
-	System_flush();
+    Board_initEMAC();		// is needed for receiving IP address (apparently)
+    System_printf("Board_initEMAC()\n");
+    System_flush();
 
+    /* Construct a Mailbox instance */
+     mbxParams.buf = (Ptr)mailboxBuffer;
+     mbxParams.bufSize = sizeof(mailboxBuffer);
+     Mailbox_Params_init(&mbxParams);
+     Mailbox_construct(&mbxStruct, sizeof(MsgObj), NUMMSGS, &mbxParams, NULL);
+     mbxHandle = Mailbox_handle(&mbxStruct);
 
-	/* Construct a Mailbox instance */
-    Mailbox_Params_init(&mbxParams);
-    mbxParams.buf = (Ptr)mailboxBuffer;
-    mbxParams.bufSize = sizeof(mailboxBuffer);
-    Mailbox_construct(&mbxStruct, sizeof(MsgObj), NUMMSGS, &mbxParams, NULL);
-    mbxHandle = Mailbox_handle(&mbxStruct);
+    /* Start BIOS */
+    BIOS_start();
 
-
-	/* Start BIOS */
-	BIOS_start();
-
-	return (0);
+    return (0);
 }

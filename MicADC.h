@@ -17,7 +17,7 @@
 
 //interrupt void micISR(void);
 void initializeADCnStuff(void);
-void micADC(void);
 void ADC_task_fxn(UArg arg0, UArg arg1);
-
+void micADC();
+void ADC_interrupt_handler();
 #endif /* MICADC_H_ */

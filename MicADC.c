@@ -62,145 +62,147 @@
 /* Fctn declarations */
 //interrupt void micISR(void); //TODO
 /*
- * f�r Button eigene ISR, die ein Event postet
+ * für Button eigen ISR, die ein Event postet
  * ADC-Task pendet auf dieses Event ->
  * liest erst dann Daten aus
  */
-void initializeADCnStuff(void);
-void micADC(void);
-void ADC_task_fxn(UArg arg0, UArg arg1);
 
+MsgObj msg;
+_Bool gotADCInterrupt = false;
 //*************************************************************************
 
 void initializeADCnStuff(void)
 {
-	System_printf("Inside initializeADCnStuff()\n");
-	System_flush();
+    System_printf("Inside initializeADCnStuff()\n");
+    System_flush();
 
-	//Aktivieren der GPIO Ports, an denen das ADC Interface angeschlossen sein soll
-	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+    //Aktivieren der GPIO Ports, an denen das ADC Interface angeschlossen sein soll
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
 
-	//*************************************************************************
-	/*=========================== USRSW config ===========================*/
-	uint32_t ui32Strength;
-	uint32_t ui32PinType;
+    //*************************************************************************
+    /*=========================== USRSW config ===========================*/
+    uint32_t ui32Strength;
+    uint32_t ui32PinType;
 
-	/* Activate GPIO ports */
-	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOJ);    // USRSWITCH Port
+    /* Activate GPIO ports */
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOJ);    // USRSWITCH Port
 
-	/* Set pin 0 of GPIO port J to digital input */
-	GPIOPinTypeGPIOInput(USRBUTTON, SW1);
+    /* Set pin 0 of GPIO port J to digital input */
+    GPIOPinTypeGPIOInput(USRBUTTON, SW1);
 
-	/* Enable pull-up for button on pin 0 of port J damit er auf Druck reagiert und strom tut */
-	GPIOPadConfigGet(USRBUTTON, SW1, &ui32Strength, &ui32PinType);
-	GPIOPadConfigSet(USRBUTTON, SW1, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
+    /* Enable pull-up for button on pin 0 of port J damit er auf Druck reagiert und strom tut */
+    GPIOPadConfigGet(USRBUTTON, SW1, &ui32Strength, &ui32PinType);
+    GPIOPadConfigSet(USRBUTTON, SW1, ui32Strength, GPIO_PIN_TYPE_STD_WPU);
 
-	//*************************************************************************
-	/*=========================== ADC config ===========================*/
-	//Aktivieren gewuenschter ADC Peripherals
-	SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+    //*************************************************************************
+    /*=========================== ADC config ===========================*/
+    //Aktivieren gewuenschter ADC Peripherals
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
 
-	//Setzen von Treiberstaerke, Richtung f die gewuenschten ADC Pins (???)
-	GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_4);
+    //Setzen von Treiberstaerke, Richtung f die gewuenschten ADC Pins (???)
+    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_4);
 
-	while (!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0))
-	{
-	}
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_ADC0))
+    {
+    }
 
-	//Bit 0 and bit 1 of RCGCADC register are used to enable the clock to ADC0 and ADC1 modules, respectively.
-	//The RCGCADC is part of the System Control register and is located at base address of 0x400F.E000 with offset 0x638
-	//Konfigurieren der Taktquelle, aus der sich der interne ADC Takt ableiten soll
-	ADCClockConfigSet(ADC0_BASE, ADC_CLOCK_SRC_PLL | ADC_CLOCK_RATE_HALF, 24); //just used any values from TivaWare Periph Driver Lib Userguide p25
+    //Bit 0 and bit 1 of RCGCADC register are used to enable the clock to ADC0 and ADC1 modules, respectively.
+    //The RCGCADC is part of the System Control register and is located at base address of 0x400F.E000 with offset 0x638
+    //Konfigurieren der Taktquelle, aus der sich der interne ADC Takt ableiten soll
+    ADCClockConfigSet(ADC0_BASE, ADC_CLOCK_SRC_PLL | ADC_CLOCK_RATE_HALF, 24); //just used any values from TivaWare Periph Driver Lib Userguide p25
 
-	//jedes der 2 ADC Module verfügt über mehrere Sequencer, die über mehrere Steps programmiert werden können
-	//Deaktiveren eines Sequencers
-	ADCSequenceDisable(ADC0_BASE, 0);
+    //jedes der 2 ADC Module verfügt über mehrere Sequencer, die über mehrere Steps programmiert werden können
+    //Deaktiveren eines Sequencers
+    ADCSequenceDisable(ADC0_BASE, 0);
 
-	// ADCACTSS (ADC Active Sample Sequencer) to enable the SS0. When bit 0 (ASEN0) is set to 1 the SS0 is enabled.
+    // ADCACTSS (ADC Active Sample Sequencer) to enable the SS0. When bit 0 (ASEN0) is set to 1 the SS0 is enabled.
 
-	//Enables a GPIO pin as a trigger to start an ADC capture.
-	GPIOADCTriggerEnable(USRBUTTON, SW1);
+    //Enables a GPIO pin as a trigger to start an ADC capture.
+    GPIOADCTriggerEnable(USRBUTTON, SW1);
 
-	/*======= driverlib userguide 4.3 prog example =======*/
-	//Config des Sequencetriggers
-	ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_EXTERNAL, 0);
+    /*======= driverlib userguide 4.3 prog example =======*/
+    //Config des Sequencetriggers
+    ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_EXTERNAL, 0);
 
-	//Config ein/mehr Steps innerhalb Sequence
-	ADCSequenceStepConfigure(ADC0_BASE, 0, 0,
-								ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0); //??? Reihenfolge der ADC_CTL-xxx???
+    //Config ein/mehr Steps innerhalb Sequence
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 0,
+                             ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0); //??? Reihenfolge der ADC_CTL-xxx???
 
-	//Aktivieren der Sequence
-	ADCSequenceEnable(ADC0_BASE, 0);
+    //Aktivieren der Sequence
+    ADCSequenceEnable(ADC0_BASE, 0);
 
-	ADCIntClear(ADC0_BASE, 0);
+    ADCIntClear(ADC0_BASE, 0);
 
-	//registrieren ISR
-	ADCIntRegister(ADC0_BASE, 0, micADC);
+    //registrieren ISR
+    ADCIntRegister(ADC0_BASE, 0, ADC_interrupt_handler);
 
-	//Aktivieren Interrupt
-	ADCIntEnable(ADC0_BASE, 0);
+    //Aktivieren Interrupt
+    ADCIntEnable(ADC0_BASE, 0);
 
-	uint32_t buffer;
-	ADCSequenceDataGet(ADC0_BASE, 0, &buffer);
+    uint32_t buffer;
+    ADCSequenceDataGet(ADC0_BASE, 0, &buffer);
+}
+
+void ADC_interrupt_handler()
+{
+    ADCIntClear(ADC0_BASE, 0);
+    gotADCInterrupt = true;
 }
 
 void micADC(void)
 {
-	uint32_t value[7];
+    uint32_t value[7];
 
-	int p;
-	ADCProcessorTrigger(ADC0_BASE, 0);
-	ADCIntClear(ADC0_BASE, 0);
+    int p;
+    ADCProcessorTrigger(ADC0_BASE, 0);
+    ADCSequenceDataGet(ADC0_BASE, 0, value);
 
-	ADCSequenceDataGet(ADC0_BASE, 0, value);
+    int i = 1;
 
-	int i = 1;
+    while (!gotADCInterrupt)
+    {
+        // wait for usrbutton1 to be pressed, creating interrupt
+        if (i == 1)
+        {
+            System_printf("\n>>>------------------------------->>>\n");
+            System_printf("Inside micADC()\n");
+            System_flush();
+            i--;
+        }
+    }
+    for (p = 0; p <= 8; p++)
+    {
+        System_printf("AIN9, reading %d = %4d\n", p, value[p]);
+        System_flush();
+    }
+    gotADCInterrupt = false;
 
-	while (!ADCIntStatus(ADC0_BASE, 0, false))
-	{
-		// wait for usrbutton1 to be pressed, creating interrupt
-		if (i == 1)
-		{
-			System_printf("\n>>>------------------------------->>>\n");
-			System_printf("Inside micADC()\n");
-			System_flush();
-			i--;
-		}
-	}
+    msg.id = 1;
+    msg.val = 'a';
 
-	for (p = 0; p <= 8; p++)
-	{
-		System_printf("AIN9, reading %d = %4d\n", p, value[p]);
-		System_flush();
-	}
+    if (Mailbox_post(mbxHandle, &msg, BIOS_WAIT_FOREVER))
+    {
 
-
-
-
-	MsgObj msg;
-	msg.id = 1;
-	msg.val = 'a';
-
-	if (Mailbox_post(mbxHandle, &msg, BIOS_NO_WAIT))
-	{
-
-		System_printf("Mailbox Write: ID = %d and Value = '%c'.\n", msg.id,
-						msg.val);
-		System_flush();
-	}
-	else
-	{
-		System_printf("Mailbox Write Failed: ID = %d and Value = '%c'.\n",
-						msg.id, msg.val);
-		System_flush();
-	}
-
+//        System_printf("Mailbox Write: ID = %d and Value = '%c'.\n", msg.id,
+//                      msg.val);
+//        System_flush();
+    }
+    else
+    {
+        System_printf("Mailbox Write Failed: ID = %d and Value = '%c'.\n",
+                      msg.id, msg.val);
+        System_flush();
+    }
 }
 
 void ADC_task_fxn(UArg arg0, UArg arg1)
 {
-	micADC();
-	System_printf("--------------------\n");
-	System_flush();
+    while(1)
+    {
+        micADC();
+        System_printf("--------------------\n");
+        System_flush();
 
+        Task_sleep(100);
+    }
 }
