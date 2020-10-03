@@ -7,5 +7,5 @@
 #       or equal to the generated config header
 #
 linker.cmd: package/cfg/ese_mic_pem4f.xdl
-	$(SED) 's"^\"\(package/cfg/ese_mic_pem4fcfg.cmd\)\"$""\"C:/Users/noa/workspace_v10/ese_mic_spaghetti/Debug/configPkg/\1\""' package/cfg/ese_mic_pem4f.xdl > $@
+	$(SED) 's"^\"\(package/cfg/ese_mic_pem4fcfg.cmd\)\"$""\"/home/noa/git/ese_mic/Debug/configPkg/\1\""' package/cfg/ese_mic_pem4f.xdl > $@
 	-$(SETDATE) -r:max package/cfg/ese_mic_pem4f.h compiler.opt compiler.opt.defs

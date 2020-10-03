@@ -58,119 +58,124 @@ MsgObj msg;
  */
 void UdpFxn(UArg arg0, UArg arg1)
 {
-    while(1)
-    {
-        Mailbox_pend(mbxHandle, &msg, BIOS_WAIT_FOREVER);
+	while (1)
+	{
+		Mailbox_pend(mbxHandle, &msg, BIOS_WAIT_FOREVER);
 
-//        System_printf("Mailbox Read: ID = %d and Value = '%c'.\n", msg.id,
-//                      msg.val);
-//        System_flush();
+		int adc_val = msg.val;
 
-//        System_printf("\n>>>------------------------------->>>\n");
-        System_printf("Inside UdpFxn()\n");
-        System_flush();
+		System_printf("Mailbox Read: ID = %d and Value = '%c' - %d.\n", msg.id,
+						msg.val, adc_val);
+		System_flush();
 
-        //>>>------------------------------------------------------------->>>
-        int err = NULL;
+		System_printf("\n>>>------------------------------->>>\n");
+		System_printf("Inside UdpFxn()\n");
+		System_flush();
 
-        struct addrinfo hints;
-        struct addrinfo *result, *rp;
-        SOCKET sockfd;
-        int s;
+		int err = NULL;
 
-        memset(&hints, 0, sizeof(struct addrinfo));
-        hints.ai_family = AF_UNSPEC;    // IPv4; AF_UNSPEC -> IPv4 or IPv6
-        hints.ai_socktype = SOCK_DGRAM; // Datagram socket = UDP
-        hints.ai_flags = 0;
-        hints.ai_protocol = 0;          // Any protocol
+		struct addrinfo hints;
+		struct addrinfo *result, *rp;
+		SOCKET sockfd;
+		int s;
 
-        s = getaddrinfo(SERVIP_STR, PORT_STR, &hints, &result);
-        err = NULL;
-        if (s != 0)
-        {
-            err = fdError();
-            System_printf("getaddrinfo() failed: err=%d\n", err);
-            System_flush();
-        }
+		memset(&hints, 0, sizeof(struct addrinfo));
+		hints.ai_family = AF_UNSPEC;    // IPv4; AF_UNSPEC -> IPv4 or IPv6
+		hints.ai_socktype = SOCK_DGRAM; // Datagram socket = UDP
+		hints.ai_flags = 0;
+		hints.ai_protocol = 0;          // Any protocol
 
-        for (rp = result; rp != NULL; rp = rp->ai_next)
-        {
-            sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-            err = NULL;
-            if (sockfd < 0)
-            {
-                err = fdError();
-                System_printf("socket() failed, err=%d\n", err);
-                System_flush();
-                continue;
-            }
-            if (sockfd > 0)
-            {
-                System_printf("Huzzah, a socket!\n");
-                System_flush();
-            }
-            break;
-        }
-        //<<<-------------------------------------------------------------<<<
+		s = getaddrinfo(SERVIP_STR, PORT_STR, &hints, &result);
+		err = NULL;
+		if (s != 0)
+		{
+			err = fdError();
+			System_printf("getaddrinfo() failed: err=%d\n", err);
+			System_flush();
+		}
 
-        //>>>------------------------------------------------------------->>>
-        // https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/354644?NDK-UDP-Client-Issue
-        struct sockaddr_in bindAddr;
-        memset(&bindAddr, 0, sizeof(bindAddr));
-        bindAddr.sin_family = AF_INET;
-        bindAddr.sin_addr.s_addr = INADDR_ANY;
-        bindAddr.sin_port = htons(1025);		// I guess just a random port?
+		for (rp = result; rp != NULL; rp = rp->ai_next)
+		{
+			sockfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+			err = NULL;
+			if (sockfd < 0)
+			{
+				err = fdError();
+				System_printf("socket() failed, err=%d\n", err);
+				System_flush();
+				continue;
+			}
+			if (sockfd > 0)
+			{
+				System_printf("Huzzah, a socket!\n");
+				System_flush();
+			}
+			break;
+		}
+		//<<<-------------------------------------------------------------<<<
 
-        err = NULL;
-        if (bind(sockfd, (struct sockaddr*) &bindAddr, sizeof(bindAddr)) < 0)
-        {
-            err = fdError();
-            System_printf("bind() failed, err = %d\n", err);
-            System_flush();
-        }
-        //<<<-------------------------------------------------------------<<<
+		//>>>------------------------------------------------------------->>>
+		// https://e2e.ti.com/support/legacy_forums/embedded/tirtos/f/355/t/354644?NDK-UDP-Client-Issue
+		struct sockaddr_in bindAddr;
+		memset(&bindAddr, 0, sizeof(bindAddr));
+		bindAddr.sin_family = AF_INET;
+		bindAddr.sin_addr.s_addr = INADDR_ANY;
+		bindAddr.sin_port = htons(1025);		// I guess just a random port?
 
-        //>>>------------------------------------------------------------->>>
-        struct sockaddr_in servAddr;
+		err = NULL;
+		if (bind(sockfd, (struct sockaddr*) &bindAddr, sizeof(bindAddr)) < 0)
+		{
+			err = fdError();
+			System_printf("bind() failed, err = %d\n", err);
+			System_flush();
+		}
+		//<<<-------------------------------------------------------------<<<
 
-        memset(&servAddr, 0, sizeof(servAddr));
-        servAddr.sin_family = AF_UNSPEC;
-        servAddr.sin_port = htons(PORT);
-        inet_aton("192.168.0.136", &servAddr.sin_addr);
+		//>>>------------------------------------------------------------->>>
+		struct sockaddr_in servAddr;
+
+		memset(&servAddr, 0, sizeof(servAddr));
+		servAddr.sin_family = AF_UNSPEC;
+		servAddr.sin_port = htons(PORT);
+		inet_aton("192.168.0.136", &servAddr.sin_addr);
 
 //        System_printf("servAddr.sin_addr.s_addr = %d\n",
 //                      servAddr.sin_addr.s_addr);
 //        System_flush();
 
-        char *sendBuf = "spaghetti";
-        int bytesSent = NULL;
-        err = NULL;
 
-        do
-        {
-            bytesSent = sendto(sockfd, sendBuf, sizeof(sendBuf), 0,
-                               (struct sockaddr*) &servAddr, sizeof(servAddr));
-            if (bytesSent < 0)
-            {
-                err = fdError();
-                System_printf("sendto() of %s failed: err=%d\n", sendBuf, err);
-                System_flush();
-            }
-            else if (bytesSent == sizeof(sendBuf))
-            {
-                System_printf("sendto() of %s: bytesSent=%d, bufSize=%d\n",
-                              sendBuf, bytesSent, sizeof(sendBuf));
-                System_flush();
-            }
-        }
-        while (bytesSent < 0);
-        //<<<-------------------------------------------------------------<<<
+		char adc_str[8];
+		sprintf(adc_str, "%d", adc_val);
+
+
+		char *sendBuf = adc_str;
+		int bytesSent = NULL;
+		err = NULL;
+
+		do
+		{
+			bytesSent = sendto(sockfd, sendBuf, sizeof(sendBuf), 0,
+								(struct sockaddr*) &servAddr, sizeof(servAddr));
+			if (bytesSent < 0)
+			{
+				err = fdError();
+				System_printf("sendto() of %s failed: err=%d\n", sendBuf, err);
+				System_flush();
+			}
+			else if (bytesSent == sizeof(sendBuf))
+			{
+				System_printf("sendto() of %s: bytesSent=%d, bufSize=%d\n",
+								sendBuf, bytesSent, sizeof(sendBuf));
+				System_flush();
+			}
+		}
+		while (bytesSent < 0);
+		//<<<-------------------------------------------------------------<<<
 
 //        System_printf("Calling fdClose()\n");
 //        System_flush();
-        fdClose(sockfd);
+		fdClose(sockfd);
 
-
-        Task_sleep(10);
-    }
+		Task_sleep(10);
+	}
 }

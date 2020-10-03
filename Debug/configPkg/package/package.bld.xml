@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="windows-1252"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--  This file conforms to the DTD xdc/bld/build.dtd -->
 <package name="configPkg" version="" producerId="undefined">
     <units>
@@ -7,7 +7,7 @@
         <srcFile name="package/cfg/ese_mic_pem4f.c"/>
     </sources>
     <configscripts>
-        <srcFile name="C:/Users/noa/workspace_v10/ese_mic_spaghetti/ese_mic.cfg"/>
+        <srcFile name="/home/noa/git/ese_mic/ese_mic.cfg"/>
     </configscripts>
     <makefiles>
         <srcFile name="package.mak" src="package.bld"/>
@@ -25,7 +25,7 @@
             platform="ti.platforms.tiva:TM4C1294NCPDT:1"
             isa="v7M4"
             suffix="em4f"
-            rootDir="C:/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS"
+            rootDir="/home/noa/ti/ccs1000/ccs/tools/compiler/ti-cgt-arm_20.2.1.LTS"
             os="undefined"
             rts="ti.targets.arm.rtsarm">
             <model endian="little"
@@ -44,7 +44,7 @@
         isPartial="false"
         xCfgScript="package/cfg/ese_mic_pem4f.cfg"
         xCfgPrefix="package/cfg/ese_mic_pem4f"
-        cfgScript="C:/Users/noa/workspace_v10/ese_mic_spaghetti/ese_mic.cfg"
+        cfgScript="/home/noa/git/ese_mic/ese_mic.cfg"
         cfgArgs="null"
         />
     </configurations>
@@ -56,7 +56,7 @@
         profile="debug"
         xCfgScript="package/cfg/ese_mic_pem4f.cfg"
         xCfgPrefix="package/cfg/ese_mic_pem4f"
-        cfgScript="C:/Users/noa/workspace_v10/ese_mic_spaghetti/ese_mic.cfg"
+        cfgScript="/home/noa/git/ese_mic/ese_mic.cfg"
         cfgArgs="null"
         />
     </executables>
