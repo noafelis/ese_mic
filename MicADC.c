@@ -193,7 +193,6 @@ void micADC(void)
 	{
 		System_printf("no valid readings!\n");
 		System_flush();
-		Task_yield();
 	}
 
 	if (Mailbox_post(mbxHandle, &msg, BIOS_WAIT_FOREVER))
