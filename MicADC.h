@@ -15,7 +15,6 @@
 #define SW1 GPIO_PIN_0
 #define SW2 GPIO_PIN_1
 
-//interrupt void micISR(void);
 void initializeADCnStuff(void);
 void ADC_task_fxn(UArg arg0, UArg arg1);
 void micADC();

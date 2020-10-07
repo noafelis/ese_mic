@@ -42,8 +42,6 @@
 #include <MicADC.h>
 #include <shared_resources.h>
 
-/* Bad Global Variables */
-//Event_Handle Pi_Event;
 /******************************************************************************
  * Defines and Bad Global Vars
  *******************************************************************************/
@@ -52,7 +50,6 @@
 #define UDPPORT 31717
 
 #define SW2 GPIO_PIN_1
-
 
 MailboxMsgObj mailboxBuffer[NUMMSGS];
 Mailbox_Struct mbxStruct;

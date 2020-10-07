@@ -118,7 +118,7 @@ void UdpFxn(UArg arg0, UArg arg1)
 		memset(&bindAddr, 0, sizeof(bindAddr));
 		bindAddr.sin_family = AF_INET;
 		bindAddr.sin_addr.s_addr = INADDR_ANY;
-		bindAddr.sin_port = htons(1025);		// I guess just a random port?
+		bindAddr.sin_port = htons(1025);
 
 		err = NULL;
 		if (bind(sockfd, (struct sockaddr*) &bindAddr, sizeof(bindAddr)) < 0)
