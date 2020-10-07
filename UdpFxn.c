@@ -20,14 +20,12 @@
 
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
-//#include <ti/drivers/ports/SemaphoreP.h>
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Clock.h>
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Mailbox.h>
-//#include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/knl/Event.h>
 
 #include "inc/hw_memmap.h"
@@ -139,11 +137,6 @@ void UdpFxn(UArg arg0, UArg arg1)
 		servAddr.sin_port = htons(PORT);
 		inet_aton("192.168.0.136", &servAddr.sin_addr);
 
-//        System_printf("servAddr.sin_addr.s_addr = %d\n",
-//                      servAddr.sin_addr.s_addr);
-//        System_flush();
-
-
 		char adc_str[8];
 		sprintf(adc_str, "%d", adc_val);
 
@@ -172,8 +165,6 @@ void UdpFxn(UArg arg0, UArg arg1)
 		while (bytesSent < 0);
 		//<<<-------------------------------------------------------------<<<
 
-//        System_printf("Calling fdClose()\n");
-//        System_flush();
 		fdClose(sockfd);
 
 		Task_sleep(10);

@@ -13,9 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
-//#include <arpa/inet.h>
 
 /* XDCtools Header files */
 #include <xdc/std.h>
@@ -24,7 +21,6 @@
 
 /* TI-RTOS Header files */
 #include <ti/drivers/GPIO.h>
-//#include <ti/net/http/httpcli.h>
 
 /* BIOS Header files */
 #include <ti/sysbios/BIOS.h>
@@ -32,8 +28,6 @@
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
 #include <ti/sysbios/knl/Mailbox.h>
-//#include <ti/sysbios/knl/Semaphore.h>
-//#include <ti/sysbios/hal/Hwi.h>
 
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -53,8 +47,6 @@
 /******************************************************************************
  * Defines and Bad Global Vars
  *******************************************************************************/
-//#define HOSTNAME          "www.example.com"
-//#define REQUEST_URI       "/"
 #define USER_AGENT        "HTTPCli (ARM; TI-RTOS)"
 #define TASKSTACKSIZE 4096
 #define UDPPORT 31717
@@ -103,26 +95,6 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
                           err);
             System_flush();
         }
-
-        /*
-         *  Create the Task that handles UDP "connections."
-         *  arg0 will be the port that this task listens to.
-         */
-        /*
-		 Task_Params_init(&taskParams);
-		 taskParams.stackSize = UDPTASKSTACKSIZE;
-		 taskParams.priority = 1;
-		 taskParams.arg0 = UDPPORT;
-		 taskHandle = Task_create((Task_FuncPtr) UdpFxn, &taskParams, &eb);
-		 if (taskHandle == NULL)
-		 {
-		 err = fdError();
-		 System_printf(
-		 "netIPAddrHook: Failed to create sendADCValuesToPi Task, error: %d\n",
-		 err);
-		 System_flush();
-		 }
-         */
     }
 
 
@@ -137,7 +109,6 @@ void netIPAddrHook(unsigned int IPAddr, unsigned int IfIdx, unsigned int fAdd)
     taskParams.stackSize = TASKSTACKSIZE;
 	taskParams.priority = 1;
     taskHandle = Task_create((Task_FuncPtr) ADC_task_fxn, &taskParams, &eb2);
-    //taskHandle = Task_create((Task_FuncPtr)micADC, &taskParams, &eb2);
 
     if (taskHandle == NULL)
     {

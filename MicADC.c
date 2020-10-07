@@ -22,7 +22,6 @@
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/knl/Event.h>
 #include <ti/sysbios/knl/Mailbox.h>
-//#include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/hal/Hwi.h>
 
 /* TI-RTOS Header files */
@@ -59,13 +58,6 @@
 #include <shared_resources.h>
 
 //*************************************************************************
-/* Fctn declarations */
-//interrupt void micISR(void); //TODO
-/*
- * für Button eigen ISR, die ein Event postet
- * ADC-Task pendet auf dieses Event ->
- * liest erst dann Daten aus
- */
 
 MsgObj msg;
 _Bool gotADCInterrupt = false;
@@ -126,7 +118,7 @@ void initializeADCnStuff(void)
 
 	//Config ein/mehr Steps innerhalb Sequence
 	ADCSequenceStepConfigure(ADC0_BASE, 0, 0,
-	ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0); //??? Reihenfolge der ADC_CTL-xxx???
+	ADC_CTL_IE | ADC_CTL_END | ADC_CTL_CH0);
 
 	//Aktivieren der Sequence
 	ADCSequenceEnable(ADC0_BASE, 0);
@@ -197,8 +189,6 @@ void micADC(void)
 
 	if (Mailbox_post(mbxHandle, &msg, BIOS_WAIT_FOREVER))
 	{
-//		System_printf("Mailbox Write: ID = %d and Value = '%c'.\n", msg.id, msg.val);
-//		System_flush();
 	}
 	else
 	{
